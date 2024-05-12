@@ -3,12 +3,14 @@ set(ESTER_KERNEL_SRC
     ${ESTER_DIR}/kernel/kernel.c
     ${ESTER_DIR}/kernel/string.c
     ${ESTER_DIR}/kernel/vga.c
+    ${ESTER_DIR}/kernel/set_idt.c
 )
 
 set(ESTER_KERNEL_ASM
     ${ESTER_DIR}/kernel/boot.asm
     ${ESTER_DIR}/kernel/long_mode_start.asm
     ${ESTER_DIR}/kernel/multiboot_header.asm
+    ${ESTER_DIR}/kernel/idt.asm
 )
 
 set(ESTER_KERNEL_LINKER

@@ -101,7 +101,7 @@ start:
     mov eax, cr0
     or eax, 1 << 31
     mov cr0, eax
-    
+
     ; Load GDT and jump to 64 bit long mode
     lgdt [gdt64.pointer]
     jmp gdt64.code:long_mode_start
@@ -152,3 +152,6 @@ gdt64:
 .pointer:
     dw $ - gdt64 - 1
     dq gdt64
+
+global GDT_OFFSET_KERNEL_CODE
+%define GDT_OFFSET_KERNEL_CODE gdt64.code
