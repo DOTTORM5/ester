@@ -4,6 +4,9 @@ set(ESTER_KERNEL_SRC
     ${ESTER_DIR}/kernel/string.c
     ${ESTER_DIR}/kernel/vga.c
     ${ESTER_DIR}/kernel/set_idt.c
+    ${ESTER_DIR}/kernel/utils.c
+    ${ESTER_DIR}/kernel/8259_pic.c
+
 )
 
 set(ESTER_KERNEL_ASM

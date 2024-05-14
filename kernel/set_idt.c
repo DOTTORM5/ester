@@ -18,6 +18,7 @@ void exception_handler()
 {
     DEBUG_WARNING("INTO THE HANDLER"); 
     __asm__ volatile ("cli; hlt");    
+    return;
 }
 
 void idt_set_descriptor(__u8 vector, void* isr, __u8 flags) 
@@ -31,6 +32,7 @@ void idt_set_descriptor(__u8 vector, void* isr, __u8 flags)
     descriptor->isr_mid        = ((__u64)isr >> 16) & 0xFFFF;
     descriptor->isr_high       = ((__u64)isr >> 32) & 0xFFFFFFFF;
     descriptor->reserved       = 0;
+    return;
 }
 
  
@@ -45,6 +47,7 @@ void idt_init()
     }
  
     // __asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
-    __asm__ volatile ("lidt [idtr]");
-    // __asm__ volatile ("sti"); // set the interrupt flag
+    __asm__ volatile ("lidt [idtr]"); // load the new IDT
+    __asm__ volatile ("sti"); // set the interrupt flag
+    return; 
 }
