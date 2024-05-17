@@ -6,7 +6,7 @@ bits 32
 start:
     mov esp, stack_top
 
-    ; check multiboot presence
+    ; check multiboot2 presence
     cmp eax, 0x36d76289
     jne .no_multiboot
     
@@ -44,6 +44,7 @@ start:
 
     ; test if extended processor info in available
     mov eax, 0x80000000    ; implicit argument for cpuid
+    push ebx               ; save ebx because cpuid overwrite it, i need this for the multiboot2 info struct address
     cpuid                  ; get highest supported argument
     cmp eax, 0x80000001    ; it needs to be at least 0x80000001
     jb .no_long_mode       ; if it's less, the CPU is too old for long mode
@@ -54,6 +55,7 @@ start:
     test edx, 1 << 29      ; test if the LM-bit is set in the D-register
     jz .no_long_mode       ; If it's not set, there is no long mode
 
+    pop ebx                ; restore ebx
 
     ; SETUP PAGE TABLE
     ; map first P4 entry to P3 table

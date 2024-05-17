@@ -4,7 +4,11 @@
 #include "kernel.h"
 #include "8259_pic.h"
 
-void kernel_entry()
+
+	__attribute__((aligned(0x8))) 
+	__u32 * m2_info;
+
+void kernel_entry( __u32 m2_info_address ) 
 {
 	 __asm__ volatile ("sti");
 	DEBUG_INFO("KERNEL ENTRY!!!");
@@ -19,7 +23,15 @@ void kernel_entry()
 
 	DEBUG_INFO("IDT LOADED AND INTERRUPTS ENABLED");
 
-	__asm__ volatile ("int $0");
+	// __asm__ volatile ("int $0");
+	m2_info = ( __u32 * ) m2_info_address;
+	// if (  m2_info_address ==  0x107f38 ) {
+	if ( *m2_info == 0x410 ) {
+		DEBUG_INFO(" > 32");
+	}
+	else {
+		DEBUG_INFO(" < 32");
+	}
 
 	return; 
 }	
