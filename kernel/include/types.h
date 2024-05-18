@@ -2,8 +2,8 @@
 #define TYPES_H
 
 typedef unsigned long long  __u64;
-typedef unsigned long       __u32;
+typedef unsigned int        __u32;   /* For some forget reason, I used -std=gnu99 as standard C (maybe some guide tell me this), in this standard unsigned long is 64 bit, so i have to use unsigned int */
 typedef unsigned short      __u16;
-typedef char                __u8;    /* This is very ugly, think will not be used */
+typedef unsigned char       __u8;    /* This is very ugly, but works */
 
 #endif

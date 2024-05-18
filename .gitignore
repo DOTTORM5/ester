@@ -15,3 +15,5 @@ build/*
 
 iso
 iso/*
+
+.gdb_history

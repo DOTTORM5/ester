@@ -5,7 +5,8 @@ project(ester LANGUAGES C ASM_NASM)
 set(ESTER_DIR ${CMAKE_CURRENT_SOURCE_DIR}) 
 set(CMAKE_C_COMPILER   /home/manuel/opt/cross/bin/x86_64-elf-gcc) # to be properly paramitrazed
 
-set(GCC_COMPILE_FLAGS "-std=gnu99 -ffreestanding -Wall -Wextra -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2")
+# set(GCC_COMPILE_FLAGS "-std=gnu99 -ffreestanding -Wall -Wextra -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2")
+set(GCC_COMPILE_FLAGS "-std=gnu99 -ffreestanding -Wall -Wextra -mno-red-zone -mno-mmx -mno-sse -mno-sse2")
 set(GCC_LINK_FLAGS    "-n -nostdlib -v")
 set(CMAKE_C_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COMPILE_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINK_FLAGS}")
