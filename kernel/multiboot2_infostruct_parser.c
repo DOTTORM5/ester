@@ -6,12 +6,11 @@
 __module_tag * multiboot2_parser (__u32 base_address)
 {
     __fixed_tag  * fixed_tag = (__fixed_tag *) base_address;
-    // __u8 * u8_ptr = ( __u8 * ) base_address;
     __u32 * u32_ptr = ( __u32 * ) base_address;
     __module_tag * module_tag;
-    __32 cnt = 0;
+    __u32 cnt = 0;
 
-    while(cnt < __fixed_tag->total_size){
+    while(cnt < fixed_tag->total_size){
         if ( *u32_ptr == 0x3) {
             module_tag = (__module_tag *) u32_ptr;
             break;

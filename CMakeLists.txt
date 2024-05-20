@@ -17,7 +17,7 @@ set(LINKER_SCRIPT ${ESTER_DIR}/kernel/linker.ld)
 add_link_options("-T${LINKER_SCRIPT}")
 
 set (ESTER_INCLUDE_DIRS
-    "${ESTER_DIR}/kernel/include"
+    "${ESTER_DIR}/include"
 )
 
 include(${ESTER_DIR}/kernel/Filelists.cmake)
