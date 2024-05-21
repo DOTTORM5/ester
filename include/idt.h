@@ -29,14 +29,14 @@ typedef struct {
  * @param __u8 vector: index in the vector table.
  * @param void* isr  : interrupt service routine.
  * @param __u8 flags : general flags.
- * @return void 
+ * @return void
  */
 void idt_set_descriptor(__u8 vector, void* isr, __u8 flags);
 
 /**
  * Function to set up IDT
  * @param void
- * @return void 
+ * @return void
  */
 void idt_init(void);
 
