@@ -26,3 +26,5 @@ Each TEST session includes also a complete refactor since for now I'm putting al
 ### Extra to do
 - Examine every gcc flag and setting (using a modified gcc cross compiler)
 - Examine all multiboo2 parameters into the info structure (maybe there is also PCIe there, ACPI MCFG...)
+
+What I call VGA, actually is the legacy VGA text mode.

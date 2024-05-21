@@ -20,7 +20,7 @@ typedef struct {
 } __attribute__((aligned(0x8))) __module_tag;
 
 
-void multiboot2_parser(__u32 base_address); 
+__module_tag * multiboot2_parser(__u32 base_address); 
 
 
 
