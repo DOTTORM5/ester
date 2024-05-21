@@ -3,10 +3,11 @@
 #include "idt.h"
 #include "kernel.h"
 #include "8259_pic.h"
-#include "multiboot2_infostruct_parser.h"
+// #include "multiboot2_infostruct_parser.h"
+#include "pci.h"
 
 
-void kernel_entry( __u32 m2_info_address ) 
+void kernel_entry( __u32 m2_info_address )
 {
 	 __asm__ volatile ("sti");
 	DEBUG_INFO("KERNEL ENTRY!!!");
@@ -21,7 +22,9 @@ void kernel_entry( __u32 m2_info_address )
 
 	DEBUG_INFO("IDT LOADED AND INTERRUPTS ENABLED");
 
-	multiboot2_parser(m2_info_address);
+	// multiboot2_parser(m2_info_address);
 
-	return; 
-}	
+	pci_recursive_scan(); /* Start PCI scanning */
+
+	return;
+}

@@ -20,7 +20,12 @@
 #define PCI_MAX_DEVICES_PER_BUS       32
 #define PCI_MAX_FUNCTIONS_PER_DEVICE  8
 
+
+#define PCI_VECTOR_DEV_ADD_ERR        1
+#define PCI_VECTOR_DEV_ADD_SUCC       0
+
 /* Maybe these structures are useless, we need just save what device exists in terms of bus|dev|func, that are the parameter used to access in I/O mechanism 1  */
+/* For now unused */
 /* General PCI device */
 typedef struct {
     __u16 vendor_id;
@@ -101,6 +106,7 @@ typedef struct {
 } __pci_to_cardbus_bridge_config_space ; /* should it be aligned ? */
 
 
+/* PCI device struct */
 typedef struct {
     __u8 bus;
     __u8 device;
@@ -108,10 +114,28 @@ typedef struct {
 } __pci_dev;
 
 /* This containts all pci_devices in terms of bus|dev|func, this should be a vector dinamically allocated, but we don't have heap strategy implemented yet, we wrongly give it a fixed size for now */
-static struct pci_devices{
+static struct {
     __pci_dev pci_devices[PCI_MAX_DEVICES];
     __u16 pci_devices_cnt;     /* Effective number of pci_devices */
-};
+} pci_vector_devices ;
+
+/* PCI device struct management */
+
+/* Initialize the pci_vector structure */
+void pci_vector_dev_init(void);
+
+/* Create a __pci_dev */
+static __pci_dev pci_dev_create(__u8 bus, __u8 device, __u8 function);
+
+/* Return the number of PCI dev actually present */
+__u16 pci_vector_dev_cnt(void);
+
+/* Return a __pci_dev present indexed by index, this is not destructive */
+__pci_dev pci_vector_dev_get(__u16 index);
+
+/* Add a device in terms of bus|device|function to the PCI vector device struct */
+__u8 pci_vector_dev_add(__u8 bus, __u8 device, __u8 function);
+
 
 /* UTILITY */
 /* For all devices */
@@ -125,10 +149,31 @@ static __u16 pci_get_vendor_id(__u8 bus, __u8 device, __u8 function); /* Should 
 /* Get the header type of a pci device */
 static __u8 pci_get_header_type(__u8 bus, __u8 device, __u8 function);
 
+/* Get the class code of a pci device */
+static __u8 pci_get_class_code(__u8 bus, __u8 device, __u8 function);
+
+/* Get the sub class code of a pci device */
+static __u8 pci_get_sub_class_code(__u8 bus, __u8 device, __u8 function);
+
 
 /* For bridge only */
 
 /* Get the secondary bus attached to a PCI-to-PCI bridge, this is valid only if you call it on a valid bridge */
 static __u8 pci_get_secondary_bus(__u8 bus, __u8 device, __u8 function);
+
+
+/* SCANNING routines */
+
+/* Scan a given PCI function */
+static void pci_function_scan(__u8 bus, __u8 device, __u8 function);
+
+/* Scan a given PCI device */
+static void pci_device_scan(__u8 bus, __u8 device);
+
+/* Scan a given PCI bus */
+static void pci_bus_scan(__u8 bus);
+
+/* Do a recursive scan on the PCI tree starting from the root */
+void pci_recursive_scan(void);
 
 #endif // PCI_H

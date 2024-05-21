@@ -1,7 +1,6 @@
 # ester
 Ester, a really funny OS
 
-
 ### To do
 - Implement PCI driver/logic
 - TEST session 1
@@ -21,6 +20,8 @@ Ester, a really funny OS
 - TEST session 8
 - TEST session 9 (final test)
 - First release !!!
+
+Each TEST session includes also a complete refactor since for now I'm putting all stuff of something in a single file (PCI for example)
 
 ### Extra to do
 - Examine every gcc flag and setting (using a modified gcc cross compiler)

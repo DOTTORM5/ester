@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(ester LANGUAGES C ASM_NASM)
 
-set(ESTER_DIR ${CMAKE_CURRENT_SOURCE_DIR}) 
+set(ESTER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_C_COMPILER   /home/manuel/opt/cross/bin/x86_64-elf-gcc) # to be properly paramitrazed
 
 # set(GCC_COMPILE_FLAGS "-std=gnu99 -ffreestanding -Wall -Wextra -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2")
@@ -21,8 +21,9 @@ set (ESTER_INCLUDE_DIRS
 )
 
 include(${ESTER_DIR}/kernel/Filelists.cmake)
+include(${ESTER_DIR}/pci/Filelists.cmake)
 
-add_executable(ester.bin ${ESTER_KERNEL_SRC} ${ESTER_KERNEL_ASM} ${LINKER_SCRIPT})
+add_executable(ester.bin ${ESTER_KERNEL_SRC} ${ESTER_PCI_SRC} ${ESTER_KERNEL_ASM} ${LINKER_SCRIPT})
 target_include_directories(ester.bin PRIVATE ${ESTER_INCLUDE_DIRS})
 set_target_properties(ester.bin PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
 
