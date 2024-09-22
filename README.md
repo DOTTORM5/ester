@@ -1,6 +1,31 @@
 # ester
 Ester, a really funny OS
 
+## Getting Started
+```
+mkdir build; 
+cd build;
+cmake ..;
+make;
+make iso;
+```
+The system uses Qemu for debugging. 
+"Make iso" launches Qemu with the ester iso and wait for GDB connection.
+To use GDB
+```
+gdb ester.bin
+target remote localhost:1234
+```
+$
+prova
+$
+
+### Common Issues
+#### GTK problem
+```
+unset GTK_PATH;
+```
+
 ### To do
 - Implement PCI driver/logic
 - TEST session 1
