@@ -16,9 +16,6 @@ To use GDB
 gdb ester.bin
 target remote localhost:1234
 ```
-$
-prova
-$
 
 ### Common Issues
 #### GTK problem
