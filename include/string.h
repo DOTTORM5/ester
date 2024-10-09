@@ -1,6 +1,8 @@
 #ifndef STRING_H
 #define STRING_H
 
-int strlen(char *str);
+#include "types.h"
+
+__u32 strlen(const char *str);
 
 #endif

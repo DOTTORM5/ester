@@ -24,6 +24,8 @@ unset GTK_PATH;
 ```
 
 ### To do
+- Implement a strong printk system (through vga for now)
+- Implement keyboard support (ps/2 for now)
 - Implement PCI driver/logic
 - TEST session 1
 - Implement AHCI (for SATA controller) over PCI driver

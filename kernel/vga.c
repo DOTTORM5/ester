@@ -2,7 +2,7 @@
 
 static __vga_device vga_device = { ( volatile __u16* ) VGA_BASE_ADDRESS };
 
-static void vga_print_char(unsigned char c, unsigned char background, unsigned char foreground)
+static void vga_print_c(unsigned char c, unsigned char background, unsigned char foreground)
 {
     /*  | BLINK (1) | BACKGROUND (3) | FOREGROUND (4) | CHAR (8) | */
     __u16 d = (__u16) ( (( ( (0x0f & background)  << 4 ) | ( 0x0f & foreground ) ) << 8 ) | ( __u16 ) c);
@@ -53,7 +53,32 @@ static void vga_scroll()
 }
 
 
-void vga_print(char *txt, unsigned char background, unsigned char foreground)
+void vga_print_char(unsigned char c, unsigned char background, unsigned char foreground)
+{
+    __u16 c_line = 0;     /* Current writing line */
+    __u16 c_column = 0;   /* Current writing column (character) */
+
+    if ( ( __u32 ) vga_device.txt_addr ==  VGA_BASE_ADDRESS) {
+        c_line = (__u16) (((__u32) (vga_device.txt_addr) - (__u32) VGA_BASE_ADDRESS) / (VGA_TXT_WIDTH*2) );
+    }
+    else{
+        c_line = (__u16) (((__u32) (vga_device.txt_addr-1) - (__u32) VGA_BASE_ADDRESS) / (VGA_TXT_WIDTH*2) );
+    }
+    if (c == '\n' ) {
+        vga_device.txt_addr = ( volatile __u16* ) VGA_BASE_ADDRESS + ((c_line+1) * VGA_TXT_WIDTH);
+    }
+    else {
+        c_column = (__u16) (((__u32) (vga_device.txt_addr) - (__u32) VGA_BASE_ADDRESS) / (VGA_TXT_HEIGHT*2) );
+        if ( (c_line >= VGA_TXT_HEIGHT-1) && (c_column == VGA_TXT_WIDTH) ) {
+            vga_scroll();
+        }
+        vga_print_c(c, background, foreground);
+        vga_device.txt_addr++;
+    }
+    return;
+} 
+
+void vga_print(char * txt, unsigned char background, unsigned char foreground)
 {
     __u16 i = 0;
     __u16 c_line = 0;     /* Current writing line */
@@ -74,7 +99,7 @@ void vga_print(char *txt, unsigned char background, unsigned char foreground)
             if ( (c_line >= VGA_TXT_HEIGHT-1) && (c_column == VGA_TXT_WIDTH) ) {
                 vga_scroll();
             }
-            vga_print_char(txt[i], background, foreground);
+            vga_print_c(txt[i], background, foreground);
             vga_device.txt_addr++;
         }
         i++;

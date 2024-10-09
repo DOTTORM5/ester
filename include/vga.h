@@ -30,6 +30,7 @@ typedef struct {
     volatile __u16 *txt_addr;      /* Text address pointer */
 } __vga_device;
 
+void vga_print_char(unsigned char c, unsigned char background, unsigned char foreground);
 void vga_print(char *txt, unsigned char background, unsigned char foreground);
 
 #endif
