@@ -52,7 +52,7 @@ static void vga_scroll()
     return;
 }
 
-
+/* Print a single char while keeping the screen formatting good */
 void vga_print_char(unsigned char c, unsigned char background, unsigned char foreground)
 {
     __u16 c_line = 0;     /* Current writing line */
@@ -78,6 +78,7 @@ void vga_print_char(unsigned char c, unsigned char background, unsigned char for
     return;
 } 
 
+/* Print an entire string while keeping the screen formatting good */
 void vga_print(char * txt, unsigned char background, unsigned char foreground)
 {
     __u16 i = 0;

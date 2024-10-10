@@ -1,29 +1,39 @@
 #include "vga.h"
-#include "printk.h"
 #include "string.h"
+#include "ascii_utils.h"
+#include "printk.h"
+// Maybe implement also this by yourself in the future 
+#include <stdarg.h> 
 
 
-// Virtual print - call the right driver print function for now vga only
-static void v_print_c(char c)
+// Print char - call the right driver print function - for now vga only
+static void print_char (char c)
 {
     return vga_print_char(c, BLACK, RED);
 }
 
-void printk(const char *str, ...)
+static void print_int (int value)
 {
+    char ascii_value[INT_MAX_DIGITS];  /* Need dynamic allocation... */
+    itoa(value, ascii_value);
+    __u32 i = 0;
+    while (ascii_value[i]) print_char(ascii_value[i++]);
+    return;
+} 
+
+void printk (const char *str, ...)
+{
+    /* SECURITY WARNING - NEED A CHECK ON THE VA ARGS LENGTH ETC*/
     /* Start arg list */
     va_list arg_lst;
     va_start(arg_lst, str);
 
-    /* Get the string length - security check */
-    __u32 str_len = strlen(str);
-    
-    /* Placeholder token */
+    /* Invalid token - a */
     char token = 'a';
-
+    int  arg;
     __u32 i = 0;
-    while ( i < str_len ) {
-        
+    
+    while ( str[i] ) {
         if ( str[i] == '%' ) {
             token = str[i+1];
         }
@@ -31,19 +41,22 @@ void printk(const char *str, ...)
             token = 'a';
         }
 
-        /* Check token - in another function */
+        /* Check token - to be handled better */
         if ( token == 'd' ) {
-            int arg = va_arg(arg_lst, int);
-            
-            /* Implement itoa */
-            char hex_arg = (char) (arg + 48);
-
-            v_print_c(hex_arg); 
+            arg = va_arg(arg_lst, int);
+            print_int(arg);
             i++;
-        } 
+        }
+
+        /* Not a valid token - to be handled better */
+        else {
+            print_char(str[i]); 
+        }
+
         i++;
-    } 
+    }
+
+    va_end(arg_lst);
 
     return;
-
 }

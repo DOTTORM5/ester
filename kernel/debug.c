@@ -12,7 +12,6 @@ void DEBUG_ERROR(char *msg)
         DEBUG_ERROR("The msg is too long");
         return;
     }
-    
     vga_print("[ ERROR ] ", BLACK, RED); 
     vga_print(msg, BLACK, RED);
     vga_print("\n", BLACK, RED); 

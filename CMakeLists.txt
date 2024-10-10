@@ -27,4 +27,4 @@ add_executable(ester.bin ${ESTER_KERNEL_SRC} ${ESTER_PCI_SRC} ${ESTER_KERNEL_ASM
 target_include_directories(ester.bin PRIVATE ${ESTER_INCLUDE_DIRS})
 set_target_properties(ester.bin PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
 
-add_custom_target(iso COMMAND cp ester.bin ${ESTER_DIR}/iso/boot/ COMMAND grub-mkrescue -o ester.iso ${ESTER_DIR}/iso/ COMMAND qemu-system-x86_64 -cdrom ester.iso -s -S)
+add_custom_target(iso COMMAND cp ester.bin ${ESTER_DIR}/iso/boot/ COMMAND grub-mkrescue -o ester.iso ${ESTER_DIR}/iso/ COMMAND qemu-system-x86_64 -cdrom ester.iso ) #-s -S)

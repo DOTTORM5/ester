@@ -91,7 +91,7 @@ void kernel_entry( __u32 m2_info_address )
 
 	
 
-	printk("%d %d %d %d", 1, 2, 3, 4, 5, 6, 7);
+	printk("Ciao %d %d %d\n", 12, 123, 1234567890);
 
 	DEBUG_INFO("FINISH");
 
