@@ -9,7 +9,8 @@
 // Print char - call the right driver print function - for now vga only
 static void print_char (char c)
 {
-    return vga_print_char(c, BLACK, RED);
+    vga_print_char(c, BLACK, RED);
+    return;
 }
 
 static void print_int (int value)
@@ -21,6 +22,7 @@ static void print_int (int value)
     return;
 } 
 
+/* To be tested and optimized */
 void printk (const char *str, ...)
 {
     /* SECURITY WARNING - NEED A CHECK ON THE VA ARGS LENGTH ETC*/
@@ -30,7 +32,6 @@ void printk (const char *str, ...)
 
     /* Invalid token - a */
     char token = 'a';
-    int  arg;
     __u32 i = 0;
     
     while ( str[i] ) {
@@ -43,20 +44,19 @@ void printk (const char *str, ...)
 
         /* Check token - to be handled better */
         if ( token == 'd' ) {
-            arg = va_arg(arg_lst, int);
-            print_int(arg);
+            print_int(va_arg(arg_lst, int));
             i++;
         }
-
+        else if ( token == 's' ){
+            print_char(va_arg(arg_lst, int));
+            i++;
+        } 
         /* Not a valid token - to be handled better */
         else {
             print_char(str[i]); 
         }
-
         i++;
     }
-
     va_end(arg_lst);
-
     return;
 }

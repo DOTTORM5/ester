@@ -23,22 +23,9 @@ typedef struct {
 	__u64	base;
 } __attribute__((packed)) idtr_t;
 
-
-/**
- * Function to set up idt descriptor
- * @param __u8 vector: index in the vector table.
- * @param void* isr  : interrupt service routine.
- * @param __u8 flags : general flags.
- * @return void
- */
 void idt_set_descriptor(__u8 vector, void* isr, __u8 flags);
-
-/**
- * Function to set up IDT
- * @param void
- * @return void
- */
 void idt_init(void);
+void register_interrupt_handler(__u8 vector, __u64 addr);
 
 
 #endif // IDT_H

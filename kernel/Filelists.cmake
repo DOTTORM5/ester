@@ -9,6 +9,7 @@ set(ESTER_KERNEL_SRC
     ${ESTER_DIR}/kernel/multiboot2_infostruct_parser.c
     ${ESTER_DIR}/kernel/ascii_utils.c
     ${ESTER_DIR}/kernel/printk.c
+    ${ESTER_DIR}/kernel/ps2_keyboard.c
 )
 
 set(ESTER_KERNEL_ASM
