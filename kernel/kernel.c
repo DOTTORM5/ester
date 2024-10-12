@@ -11,7 +11,7 @@
 #include "ps2_keyboard.h"
 
 
-void kernel_entry( __u32 m2_info_address )
+void kernel_entry( uint32_t m2_info_address )
 {
 	// __asm__ volatile ("cli");
 	// DEBUG_INFO("KERNEL ENTRY!!!");

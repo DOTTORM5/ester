@@ -17,7 +17,7 @@ static void print_int (int value)
 {
     char ascii_value[INT_MAX_DIGITS];  /* Need dynamic allocation... */
     itoa(value, ascii_value);
-    __u32 i = 0;
+    uint32_t i = 0;
     while (ascii_value[i]) print_char(ascii_value[i++]);
     return;
 } 
@@ -32,7 +32,7 @@ void printk (const char *str, ...)
 
     /* Invalid token - a */
     char token = 'a';
-    __u32 i = 0;
+    uint32_t i = 0;
     
     while ( str[i] ) {
         if ( str[i] == '%' ) {

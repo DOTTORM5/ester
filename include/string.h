@@ -3,8 +3,8 @@
 
 #include "types.h"
 
-__u32 strlen(const char *str);
-__u8  strcpy(const char *str_src, char *str_dst);
+uint32_t strlen(const char *str);
+uint8_t  strcpy(const char *str_src, char *str_dst);
 void  strrev(char *str); 
 
 #endif

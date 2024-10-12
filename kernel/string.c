@@ -3,9 +3,9 @@
 #include "vga.h"
 
 /* String length */
-__u32 strlen(const char *str)
+uint32_t strlen(const char *str)
 {   
-    __u32 len = 0;
+    uint32_t len = 0;
     while(str[len]){
         len++;
     }
@@ -13,14 +13,14 @@ __u32 strlen(const char *str)
 }
 
 /* Sting copy - we need to introduce ERROR CODES*/
-__u8 strcpy(const char *str_src, char *str_dst)
+uint8_t strcpy(const char *str_src, char *str_dst)
 {
-    __u32 src_len = strlen(str_src);
-    __u32 dst_len = strlen(str_dst);
+    uint32_t src_len = strlen(str_src);
+    uint32_t dst_len = strlen(str_dst);
 
     if (src_len != dst_len) return 1; 
 
-    for ( __u32 i = 0; i < dst_len; i++ ) {
+    for ( uint32_t i = 0; i < dst_len; i++ ) {
         str_dst[i] = str_src[i];
     }
 
@@ -30,12 +30,12 @@ __u8 strcpy(const char *str_src, char *str_dst)
 /* String reverse */
 void strrev (char *str) 
 {
-    __u32 str_len   = strlen(str);
-    __u32 half_len  = str_len/2;
+    uint32_t str_len   = strlen(str);
+    uint32_t half_len  = str_len/2;
 
     char tmp;
-    __u32 j = str_len-1; 
-    for ( __u32 i = 0; i < half_len; i++ ){
+    uint32_t j = str_len-1; 
+    for ( uint32_t i = 0; i < half_len; i++ ){
         tmp = str[i];
         str[i] = str[j];
         str[j--] = tmp;

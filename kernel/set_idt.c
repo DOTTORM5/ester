@@ -21,28 +21,28 @@ void exception_handler(void)
     // DEBUG_WARNING("INTO THE HANDLER");
     // printk("VECTOR: %d\n", vector);
     // printk("VECTOR: %d\n", pic_get_isr());
-    __u16 vector = pic_get_isr();
+    uint16_t vector = pic_get_isr();
     pic_send_eoi(vector-1);
     return;
 }
 
 /**
  * Function to set up idt descriptor
- * @param __u8 vector: index in the vector table.
+ * @param uint8_t vector: index in the vector table.
  * @param void* isr  : interrupt service routine.
- * @param __u8 flags : general flags.
+ * @param uint8_t flags : general flags.
  * @return void
  */
-void idt_set_descriptor(__u8 vector, void* isr, __u8 flags) 
+void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) 
 {
     idt_entry_t* descriptor = &idt[vector];
  
-    descriptor->isr_low        = (__u64)isr & 0xFFFF;
-    descriptor->kernel_cs      = (__u16)GDT_OFFSET_KERNEL_CODE;
+    descriptor->isr_low        = (uint64_t)isr & 0xFFFF;
+    descriptor->kernel_cs      = (uint16_t)GDT_OFFSET_KERNEL_CODE;
     descriptor->ist            = 0;
     descriptor->attributes     = flags;
-    descriptor->isr_mid        = ((__u64)isr >> 16) & 0xFFFF;
-    descriptor->isr_high       = ((__u64)isr >> 32) & 0xFFFFFFFF;
+    descriptor->isr_mid        = ((uint64_t)isr >> 16) & 0xFFFF;
+    descriptor->isr_high       = ((uint64_t)isr >> 32) & 0xFFFFFFFF;
     descriptor->reserved       = 0;
     return;
 }
@@ -54,10 +54,10 @@ void idt_set_descriptor(__u8 vector, void* isr, __u8 flags)
  */
 void idt_init() 
 {
-    idtr.base = (__u64) &idt[0];
-    idtr.limit = (__u16)sizeof(idt_entry_t) * (IDT_MAX_DESCRIPTORS - 1);
+    idtr.base = (uint64_t) &idt[0];
+    idtr.limit = (uint16_t)sizeof(idt_entry_t) * (IDT_MAX_DESCRIPTORS - 1);
  
-    for (__u8 vector = 0; vector < 47; vector++) {
+    for (uint8_t vector = 0; vector < 47; vector++) {
         idt_set_descriptor(vector, isr_stub_table[vector], 0x8E); // 0x8E is for interrupt gate, 0x8F is for trap gate etc...
         // vectors[vector] = true;
     }
@@ -70,11 +70,11 @@ void idt_init()
 /* We use idt_set_descriptor avoiding to enter the stub table and call exception_handler we have to think about this... */
 /**
  * Function to register interrupt handler
- * @param __u8  vector : interrupt vector
- * @param __u64 addr   : interrupt handler address
+ * @param uint8_t  vector : interrupt vector
+ * @param uint64_t addr   : interrupt handler address
  * @return void
  */
-void register_interrupt_handler(__u8 vector, __u64 addr)
+void register_interrupt_handler(uint8_t vector, uint64_t addr)
 {
     idt_set_descriptor(vector, (void *)addr, 0x8E);
 }

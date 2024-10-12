@@ -8,7 +8,7 @@
     4. All the stuff needed for task management, i don't remember this now
     5. Start the process
 */
-void elf64_loads ( __u64 base_address, __u32 total_size )
+void elf64_loads ( uint64_t base_address, uint32_t total_size )
 {
 
 

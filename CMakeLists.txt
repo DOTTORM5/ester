@@ -16,15 +16,17 @@ set(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
 set(LINKER_SCRIPT ${ESTER_DIR}/kernel/linker.ld)
 add_link_options("-T${LINKER_SCRIPT}")
 
-set (ESTER_INCLUDE_DIRS
-    "${ESTER_DIR}/include"
+include_directories(
+    ${ESTER_DIR}/include
 )
 
 include(${ESTER_DIR}/kernel/Filelists.cmake)
+add_executable(ester.bin ${ESTER_KERNEL_SRC} ${LINKER_SCRIPT})
+
 include(${ESTER_DIR}/pci/Filelists.cmake)
+include(${ESTER_DIR}/arch/x86_64/Filelists.cmake)
+include(${ESTER_DIR}/drivers/Filelists.cmake)
 
-add_executable(ester.bin ${ESTER_KERNEL_SRC} ${ESTER_PCI_SRC} ${ESTER_KERNEL_ASM} ${LINKER_SCRIPT})
-target_include_directories(ester.bin PRIVATE ${ESTER_INCLUDE_DIRS})
+
 set_target_properties(ester.bin PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
-
 add_custom_target(iso COMMAND cp ester.bin ${ESTER_DIR}/iso/boot/ COMMAND grub-mkrescue -o ester.iso ${ESTER_DIR}/iso/ COMMAND qemu-system-x86_64 -cdrom ester.iso)# -s -S)

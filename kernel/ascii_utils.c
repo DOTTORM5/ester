@@ -6,7 +6,7 @@
 void itoa( int value, char * str /*, int base*/ )
 {
     int residual = value;
-    __u32 i = 0;
+    uint32_t i = 0;
     do {
         str[i] = ( char ) ( (residual%10 + ASCII_NUM_BASE) );
         i++; 
