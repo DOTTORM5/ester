@@ -5,7 +5,6 @@ project(ester LANGUAGES C ASM_NASM)
 set(ESTER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_C_COMPILER   /home/manuel/opt/cross/bin/x86_64-elf-gcc) # to be properly paramitrazed
 
-# set(GCC_COMPILE_FLAGS "-std=gnu99 -ffreestanding -Wall -Wextra -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2")
 set(GCC_COMPILE_FLAGS "-std=gnu99 -ffreestanding -Wall -Wextra -mno-red-zone -mno-mmx -mno-sse -mno-sse2")
 set(GCC_LINK_FLAGS    "-n -nostdlib -v")
 set(CMAKE_C_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COMPILE_FLAGS}")
@@ -21,12 +20,10 @@ include_directories(
 )
 
 include(${ESTER_DIR}/kernel/Filelists.cmake)
-add_executable(ester.bin ${ESTER_KERNEL_SRC} ${LINKER_SCRIPT})
+add_executable(ester.bin ${ESTER_KERNEL_SRC})   # Just to give to cmake a language ... 
 
 include(${ESTER_DIR}/pci/Filelists.cmake)
 include(${ESTER_DIR}/arch/x86_64/Filelists.cmake)
 include(${ESTER_DIR}/drivers/Filelists.cmake)
 
-
-set_target_properties(ester.bin PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
 add_custom_target(iso COMMAND cp ester.bin ${ESTER_DIR}/iso/boot/ COMMAND grub-mkrescue -o ester.iso ${ESTER_DIR}/iso/ COMMAND qemu-system-x86_64 -cdrom ester.iso)# -s -S)
