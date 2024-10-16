@@ -3,6 +3,7 @@
 #include "pci.h"
 #include "utils.h"
 #include "debug.h"
+#include "printk.h"
 
 /* This containts all pci_devices in terms of bus|dev|func, this should be a vector dinamically allocated, but we don't have heap strategy implemented yet, we wrongly give it a fixed size for now */
 static struct {
@@ -42,6 +43,11 @@ static struct {
 /*static*/ uint8_t pci_get_sub_class_code(uint8_t bus, uint8_t device, uint8_t function)
 {
     return ((uint8_t) ( ( pci_read_config_long(bus,device,function, 0x08) & 0x00FF0000)  >> 16));
+}
+
+/*static*/ uint8_t pci_get_prog_if_code(uint8_t bus, uint8_t device, uint8_t function)
+{
+    return ((uint8_t) ( ( pci_read_config_long(bus,device,function, 0x08) & 0x0000FF00)  >> 8));
 }
 
 /*static*/ uint8_t pci_get_secondary_bus(uint8_t bus, uint8_t device, uint8_t function)
@@ -160,6 +166,25 @@ void pci_recursive_scan(void)
         }
     }
     return;
+}
+
+/* FIND THE AHCI Controller and return the ABAR. BAR[5], absolutely handle this in a better way!!! */
+uint32_t pci_ahci_get_abar(void)
+{
+    uint8_t class_id    = 0; 
+    uint8_t subclass_id = 0;
+    uint8_t prog_if = 0;
+    uint32_t bar = 0;
+    for ( uint8_t i = 0; i < pci_vector_devices.pci_devices_cnt; i++ ) {
+        class_id = pci_get_class_code(pci_vector_devices.pci_devices[i].bus, pci_vector_devices.pci_devices[i].device, pci_vector_devices.pci_devices[i].function );
+        subclass_id = pci_get_sub_class_code(pci_vector_devices.pci_devices[i].bus, pci_vector_devices.pci_devices[i].device, pci_vector_devices.pci_devices[i].function );
+		prog_if = pci_get_prog_if_code(pci_vector_devices.pci_devices[i].bus, pci_vector_devices.pci_devices[i].device, pci_vector_devices.pci_devices[i].function);
+        // printk("CLASS ID: %d\nSUBCLASS ID %d\nPROGIF: %d\n", class_id, subclass_id, prog_if);
+        if ( class_id == 0x1 && subclass_id == 0x6 ) {
+            bar = pci_read_config_long(pci_vector_devices.pci_devices[i].bus, pci_vector_devices.pci_devices[i].device, pci_vector_devices.pci_devices[i].function, 0x24);
+            return bar;
+		} 
+	}
 }
 
 /*****************************************************************************************************************************/

@@ -170,4 +170,8 @@ uint8_t pci_vector_dev_add(uint8_t bus, uint8_t device, uint8_t function);
 /* Do a recursive scan on the PCI tree starting from the root */
 void pci_recursive_scan(void);
 
+/* UGLY */
+uint32_t pci_ahci_get_abar(void);
+
+
 #endif // PCI_H

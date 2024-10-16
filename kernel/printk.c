@@ -44,7 +44,7 @@ void printk (const char *str, ...)
 
         /* Check token - to be handled better */
         if ( token == 'd' ) {
-            print_int(va_arg(arg_lst, int));
+            print_int(va_arg(arg_lst, unsigned int));
             i++;
         }
         else if ( token == 's' ){
