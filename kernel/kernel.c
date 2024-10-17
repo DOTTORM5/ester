@@ -40,6 +40,14 @@ void kernel_entry( uint32_t m2_info_address )
 
 	ahci_probe_port(hba_mem_ptr);
 
+	uint16_t buff[512]; 
+
+	read(&hba_mem_ptr->ports[0], 0, 0, 256, buff);
+
+	for (uint16_t i = 0; i < 512; i++) {
+		printk("%s\n", buff[i]);
+	}
+
 	__asm__ volatile ("sti");
 	while(1);
 
