@@ -10,45 +10,60 @@
 #include "printk.h"
 #include "ps2_keyboard.h"
 #include "ahci.h"
+#include "mem.h"
+
+#define AHCI_IE 0x00000002
+
+
+static char buff[1024] __attribute__((aligned(0x1000)));
+static char buff_r[1024] __attribute__((aligned(0x1000)));
 
 void kernel_entry( uint32_t m2_info_address )
 {
 	__asm__ volatile ("cli");
-	// DEBUG_INFO("KERNEL ENTRY!!!");
-	// DEBUG_INFO("Init the PIC in cascade mode");
 
 	idt_init();
 
-	// DEBUG_INFO("IDT LOADED AND INTERRUPTS ENABLED");
-
-	// multiboot2_parser(m2_info_address);
 
 	pci_recursive_scan(); /* Start PCI scanning */
 
 	ps2_keyboard_init();
 	pic_init();
 
-	
-	// uint32_t ahci_abar = pci_ahci_get_abar();
-	
-	// printk("ABAR: %d\n", ahci_abar);
+	__asm__ volatile ("sti");
 
 	HBA_MEM * hba_mem_ptr;
 	hba_mem_ptr = (HBA_MEM *) pci_ahci_get_abar();
 
-	hba_mem_ptr->ghc |= 0x80000000;
+
+	hba_mem_ptr->ghc |= AHCI_GHC_HR; /* Reset the controller */
+	while (hba_mem_ptr->ghc & AHCI_GHC_HR); /* Wait the reset complention */
+
+	hba_mem_ptr->ghc |= (AHCI_GHC_AE | AHCI_IE);
 
 	ahci_probe_port(hba_mem_ptr);
 
-	uint16_t buff[512]; 
-
-	read(&hba_mem_ptr->ports[0], 0, 0, 256, buff);
-
-	for (uint16_t i = 0; i < 512; i++) {
-		printk("%s\n", buff[i]);
+	for (uint16_t i = 0; i < 1024; i++) {
+		buff[i] = 0x61;
 	}
 
-	__asm__ volatile ("sti");
+	port_rebase(&hba_mem_ptr->ports[0], 0);
+
+	write(&hba_mem_ptr->ports[0], 0, 0, 1, buff);
+
+	read(&hba_mem_ptr->ports[0], 0, 0, 1, buff_r);
+	// read(&hba_mem_ptr->ports[0], 0, 0, 1, buff_r);
+	// read(&hba_mem_ptr->ports[0], 0, 0, 1, buff_r);
+	// read(&hba_mem_ptr->ports[0], 0, 0, 1, buff_r);
+
+	uint32_t i = 0;
+	// while(i++ < 100000000);
+
+	for (uint16_t i = 0; i < 64; i++) {
+		printk("%s", buff_r[i]);
+	}
+
+	
 	while(1);
 
 	return;

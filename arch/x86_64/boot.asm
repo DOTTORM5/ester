@@ -100,6 +100,21 @@ start:
     or eax, 0b11               ; Present + Writable
     mov [p1_table + 8*(0x1B1)], eax  ; Map 0xFEBB1000 (virtual) to 0xFEBB1000 (physical)
 
+
+
+    ; Step 3: Map P1 entry for 0xFEBB9000 to the physical address
+    mov eax, 0xFEBB9000        ; Physical address of the AHCI BAR5
+    or eax, 0b11               ; Present + Writable
+    mov [p1_table + 8*(0x1B9)], eax  ; Map 0xFEBB9000 (virtual) to 0xFEBB9000 (physical)
+
+
+    ; Step 3: Map P1 entry for 0xFEBBB000 to the physical address
+    mov eax, 0xFEBBB000        ; Physical address of the AHCI BAR5
+    or eax, 0b11               ; Present + Writable
+    mov [p1_table + 8*(0x1BB)], eax  ; Map 0xFEBBB000 (virtual) to 0xFEBBB000 (physical)
+
+    
+
     ; ENABLE PAGING
     ; load P4 to cr3 register (cpu uses this to access the P4 table)
     mov eax, p4_table
@@ -168,6 +183,8 @@ p2_table_3:
 p2_table_4:
     resb 4096
 p1_table:
+    resb 4096
+p1_table_2:
     resb 4096
 stack_bottom:
     resb 64

@@ -27,4 +27,6 @@ include(${ESTER_DIR}/arch/x86_64/Filelists.cmake)
 include(${ESTER_DIR}/drivers/Filelists.cmake)
 
 # Run qemu adding also a SATA AHCI disk REMEMBER TO CREATE THE DISK IMAGE FIRST
-add_custom_target(iso COMMAND cp ester.bin ${ESTER_DIR}/iso/boot/ COMMAND grub-mkrescue -o ester.iso ${ESTER_DIR}/iso/ COMMAND qemu-system-x86_64 -m 8G -monitor stdio -cdrom ester.iso -drive file=sata0.iso,format=raw,if=none,id=drive-sata0 -device ahci,id=ahci -device ide-hd,drive=drive-sata0,bus=ahci.0 )#-s -S )
+add_custom_target(iso COMMAND cp ester.bin ${ESTER_DIR}/iso/boot/ COMMAND grub-mkrescue -o ester.iso ${ESTER_DIR}/iso/ COMMAND qemu-system-x86_64 -d trace:handle_cmd_* -D qemu-log.txt -m 8G -monitor stdio -cdrom ester.iso -drive file=temp.img,format=raw,if=none,id=drive-sata0 -device ahci,id=ahci -device ide-hd,drive=drive-sata0,bus=ahci.0) #-s -S )
+
+# add_custom_target(iso COMMAND cp ester.bin ${ESTER_DIR}/iso/boot/ COMMAND grub-mkrescue -o ester.iso ${ESTER_DIR}/iso/ COMMAND qemu-system-x86_64 -d trace:ahci*,in_asm -D qemu-log.txt -m 8G -monitor stdio -cdrom ester.iso -hda temp.img)

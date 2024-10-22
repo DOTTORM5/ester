@@ -168,6 +168,37 @@ void pci_recursive_scan(void)
     return;
 }
 
+void pci_write(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset, uint32_t data) {
+    // Construct the PCI configuration address
+    uint32_t address = (1U << 31) | ((uint32_t)bus << 16) | ((uint32_t)device << 11) | ((uint32_t)function << 8) | (offset & 0xFC);
+
+    // Write the address to the PCI configuration address port
+    outl(0xCF8, address);
+
+    // Write the data to the PCI configuration data port
+    outl(0xCFC, data);
+}
+
+/* TO PUT IN ANOTHER FILE */
+void pci_ahci_init(uint8_t bus, uint8_t slot, uint8_t func)
+{
+    // Read the current PCI configuration register (command register is at offset 0x04)
+    uint16_t command = pci_read_config_long(bus, slot, func, 0x04);
+
+    // Enable interrupts (bit 10), DMA (bit 8), and memory space access (bit 1)
+    command |= (1 << 10);  // Set bit 10 for interrupts
+    command |= (1 << 8);   // Set bit 8 for DMA
+    command |= (1 << 2);   // Set bit 2 Bus mastering
+    command |= (1 << 1);   // Set bit 1 for memory space access
+    
+
+    // Write back the modified command register value
+    pci_write(bus, slot, func, 0x04, command);
+
+    return;
+}
+
+
 /* FIND THE AHCI Controller and return the ABAR. BAR[5], absolutely handle this in a better way!!! */
 uint32_t pci_ahci_get_abar(void)
 {
@@ -182,9 +213,14 @@ uint32_t pci_ahci_get_abar(void)
         // printk("CLASS ID: %d\nSUBCLASS ID %d\nPROGIF: %d\n", class_id, subclass_id, prog_if);
         if ( class_id == 0x1 && subclass_id == 0x6 ) {
             bar = pci_read_config_long(pci_vector_devices.pci_devices[i].bus, pci_vector_devices.pci_devices[i].device, pci_vector_devices.pci_devices[i].function, 0x24);
+            pci_ahci_init(pci_vector_devices.pci_devices[i].bus, pci_vector_devices.pci_devices[i].device, pci_vector_devices.pci_devices[i].function);
             return bar;
 		} 
 	}
 }
+
+
+
+
 
 /*****************************************************************************************************************************/

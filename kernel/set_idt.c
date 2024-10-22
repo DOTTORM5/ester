@@ -20,8 +20,12 @@ void exception_handler(void)
 {
     // DEBUG_WARNING("INTO THE HANDLER");
     // printk("VECTOR: %d\n", vector);
-    // printk("VECTOR: %d\n", pic_get_isr());
+    //printk("VECTOR: %d\n", pic_get_isr());
     uint16_t vector = pic_get_isr();
+
+    if (vector != 1 ) {
+        printk("VECTOR: %d\n", pic_get_isr());
+    }
     pic_send_eoi(vector-1);
     return;
 }
