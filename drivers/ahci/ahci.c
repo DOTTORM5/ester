@@ -75,35 +75,23 @@ void port_rebase(HBA_PORT *port, int portno)
 
 	// FIS offset: 32K+256*portno
 	// FIS entry size = 256 bytes per port
-	port->fb = AHCI_BASE + (32<<10) + (0<<8);
+	port->fb = AHCI_BASE + (32<<10) + (portno<<8);
 	port->fbu = 0;
 	memset((void*)(port->fb), 0, 256);
 
 	// Command table offset: 40K + 8K*portno
 	// Command table size = 256*32 = 8K per port
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(port->clb);
-
-	cmdheader->prdtl = 1;	// 1 prdt entries per command table
-	// 256 bytes per command table, 64+16+48+16*8
-	// Command table offset: 40K + 8K*portno + cmdheader_index*256
-	cmdheader->ctba = AHCI_BASE + (40<<10) + (0<<13) + (0<<8);
-	printk("ctba: %d\n", (void*)cmdheader->ctba);
-	cmdheader->ctbau = 0;
-	memset((void *)cmdheader->ctba, 0, 256);
-
-
-	// for (int i=0; i<32; i++)
-	// {
-	// 	cmdheader[i].prdtl = 8;	// 8 prdt entries per command table
-	// 				// 256 bytes per command table, 64+16+48+16*8
-	// 	// Command table offset: 40K + 8K*portno + cmdheader_index*256
-	// 	cmdheader[i].ctba = AHCI_BASE + (40<<10) + (portno<<13) + (i<<8);
-	// 	cmdheader[i].ctbau = 0;
-	// 	memset((void*)cmdheader[i].ctba, 0, 256);
-	// }
-
-	port->ie = 1;
-
+	for (int i=0; i<32; i++)
+	{
+		cmdheader[i].prdtl = 8;	// 8 prdt entries per command table
+		
+		// 256 bytes per command table, 64+16+48+16*8
+		// Command table offset: 40K + 8K*portno + cmdheader_index*256
+		cmdheader[i].ctba = AHCI_BASE + (40<<10) + (portno<<13) + (i<<8);
+		cmdheader[i].ctbau = 0;
+		memset((void*)cmdheader[i].ctba, 0, 256);
+	}
 	start_cmd(port);	// Start command engine
 }
 
@@ -201,49 +189,30 @@ uint8_t read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, c
 	cmdheader += 0;
 	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32_t);	// Command FIS size
 	cmdheader->w = 0;		// Read from device
-	cmdheader->prdtl = 1 /* (uint16_t)((count-1)>>4) + 1*/ ;	// PRDT entries count
+	cmdheader->prdtl = (uint16_t)((count-1)>>4) + 1;	// PRDT entries count
 
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba);
-
-	printk("CTBA in read: %d\n", cmdheader->ctba);
 	
 	memset((void *) cmdtbl, 0, sizeof(HBA_CMD_TBL) + (cmdheader->prdtl)*sizeof(HBA_PRDT_ENTRY));
 	
 	// 8K bytes (16 sectors) per PRDT
-	// int i = 0;
-	// for (i=0; i<cmdheader->prdtl-1; i++)
-	// {
-	// 	// cmdtbl->prdt_entry[i].dba = (uint32_t) buf;
-	// 	cmdtbl->prdt_entry[i].dba =  (uint32_t) ((uint64_t)buf & 0xffffffff);
-	// 	cmdtbl->prdt_entry[i].dbau = ( ( ((uint64_t)(buf)) >> 32) & 0xffffffff);
-	// 	cmdtbl->prdt_entry[i].dbc = ((count * 512) - 1);	// 4K bytes (this value should always be set to 1 less than the actual value)
-	// 	cmdtbl->prdt_entry[i].i = 1;
-	// 	buf += 4*1024;	// 4K words
-	// 	count -= 16;	// 16 sectors
-
-	// 	printk("A: %d\n", cmdtbl->prdt_entry[i].dba);
-	// }
+	int i = 0;
+	for (i=0; i<cmdheader->prdtl-1; i++)
+	{
+		cmdtbl->prdt_entry[i].dba = (uint32_t) buf;
+		cmdtbl->prdt_entry[i].dbc = 8*1024-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
+		cmdtbl->prdt_entry[i].i = 1;
+		buf += 4*1024;	// 4K words
+		count -= 16;	// 16 sectors
+	}
 	// Last entry
-	int i =  0;
-	cmdtbl->prdt_entry[i].dba =  (uint32_t) ((uint64_t)buf & 0xffffffff);
-	cmdtbl->prdt_entry[i].dbau = ( ( ((uint64_t)(buf)) >> 32) & 0xffffffff);
-
-	cmdtbl->prdt_entry[i].dbc = ((count * 512) - 1);	// 512 bytes per sector
+	cmdtbl->prdt_entry[i].dba = (uint32_t) buf;
+	cmdtbl->prdt_entry[i].dbc = (count<<9)-1;	// 512 bytes per sector
 	cmdtbl->prdt_entry[i].i = 1;
-
-	// printk("B: %d\n", cmdtbl->prdt_entry[i].dba);
 
 	// Setup command
 	FIS_REG_H2D *cmdfis =(FIS_REG_H2D*)(cmdtbl->cfis);
 
-	printk("FISADDR: %d\n", cmdtbl->cfis);
-
-
-	// for (uint8_t i=0; i<64; i++){
-	// 	cmdtbl->cfis[i] = 0x27;
-	// }
-
-	printk("FIS0: %d\n",cmdtbl->cfis[0] );
 	cmdfis->fis_type = FIS_TYPE_REG_H2D ;
 	cmdfis->c = 1;	// Command
 	cmdfis->command = ATA_CMD_READ_DMA_EX;
@@ -304,9 +273,6 @@ uint8_t read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, c
 		printk("Port is hung\n");
 		return 1;
 	}
-
-	printk("PxIS: %d, PxTFD: %d, PxSERR: %d, SIG: %d\n", port->is, port->tfd, port->serr, port->sig);
-
 	return 0;
 }
 
