@@ -33,7 +33,12 @@ void kernel_entry( uint32_t m2_info_address )
 	__asm__ volatile ("sti");
 
 	HBA_MEM * hba_mem_ptr;
-	hba_mem_ptr = (HBA_MEM *) pci_ahci_get_abar();
+
+	uint32_t ahci_phys_addr = pci_ahci_get_abar();
+
+	map_page(ahci_phys_addr, ahci_phys_addr, 0);
+
+	hba_mem_ptr = (HBA_MEM *) ahci_phys_addr; 
 
 
 	hba_mem_ptr->ghc |= AHCI_GHC_HR; /* Reset the controller */
