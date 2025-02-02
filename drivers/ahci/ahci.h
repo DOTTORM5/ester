@@ -6,6 +6,9 @@
 #define AHCI_GHC_AE (1 << 31) // AHCI Enable
 #define AHCI_GHC_HR (1 << 0)  // HBA Reset
 
+#define AHCI_IE 0x00000002
+
+
 typedef enum
 {
 	FIS_TYPE_REG_H2D	= 0x27,	// Register FIS - host to device
@@ -311,11 +314,14 @@ typedef struct tagHBA_CMD_TBL
 } HBA_CMD_TBL;
 
 
-
-
 void ahci_probe_port(HBA_MEM *abar);
 uint8_t read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, char *buf);
 void port_rebase(HBA_PORT *port, int portno);
 uint8_t write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, char *buf);
+
+// Real exposed api
+uint8_t ahci_init  (); 
+uint8_t ahci_read  (uint8_t port_index, uint64_t lba, uint32_t count, char *buf); 
+uint8_t ahci_write (uint8_t port_index, uint64_t lba, uint32_t count, char *buf);
 
 #endif

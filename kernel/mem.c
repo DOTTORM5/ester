@@ -6,10 +6,20 @@
 #define PAGE_SIZE_4KB 0x0
 #define PAGE_SIZE_2MB 0x80
 
+void memcpy(void * dst, const void * src, uint32_t len)
+{
+    char * d = (char *) dst;
+    const char * s = (const char *) src;  
+    for ( uint32_t i = 0; i < len; i++ ) {
+        d[i] = s[i];
+    }
+    return;
+}
+
 void memset(void * ptr, uint8_t val, uint32_t len)
 { 
     uint8_t * tmp =  (uint8_t *) ptr;
-    for (uint32_t i = 0; i < len; i++ ) {
+    for ( uint32_t i = 0; i < len; i++ ) {
         *tmp = val;
     }
     return;

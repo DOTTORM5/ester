@@ -2,6 +2,7 @@
 #include "ahci.h"
 #include "printk.h"
 #include "mem.h"
+#include "pci.h"
 
 #define	SATA_SIG_ATA	0x00000101	// SATA drive
 #define	SATA_SIG_ATAPI	0xEB140101	// SATAPI drive
@@ -28,6 +29,9 @@
 #define ATA_CMD_WRITE_DMA_EX 0x35
 
 #define HBA_PxIS_TFES (1 << 30)
+
+
+static HBA_MEM * hba_mem_ptr;
 
 // Stop command engine
 void stop_cmd(HBA_PORT *port)
@@ -359,3 +363,32 @@ uint8_t write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, 
 
 	return 0;  // Success
 }
+
+
+uint8_t ahci_init() 
+{
+	uint32_t ahci_phys_addr = pci_ahci_get_abar();
+	map_page(ahci_phys_addr, ahci_phys_addr, 0);
+	hba_mem_ptr = (HBA_MEM *) ahci_phys_addr; 
+	hba_mem_ptr->ghc |= AHCI_GHC_HR; /* Reset the controller */
+	while (hba_mem_ptr->ghc & AHCI_GHC_HR); /* Wait the reset complention */
+	hba_mem_ptr->ghc |= (AHCI_GHC_AE | AHCI_IE);
+	ahci_probe_port(hba_mem_ptr);
+	port_rebase(&hba_mem_ptr->ports[0], 0);
+	return 0;
+}
+
+uint8_t ahci_write (uint8_t port_index, uint64_t lba, uint32_t count, char *buf)
+{
+	uint32_t startl = (uint32_t) lba & 0xFFFFFFFF ;
+	uint32_t starth = (uint32_t) ( (lba & 0xFFFFFFFF00000000) >> 32 ) ;
+	return write(hba_mem_ptr->ports, startl, starth, count, buf);
+}
+
+uint8_t ahci_read(uint8_t port_index, uint64_t lba, uint32_t count, char *buf) 
+{
+	uint32_t startl = (uint32_t) lba & 0xFFFFFFFF;
+	uint32_t starth = (uint32_t) ( (lba & 0xFFFFFFFF00000000) >> 32 );
+	return read(hba_mem_ptr->ports, startl, starth, count, buf);
+}
+	
