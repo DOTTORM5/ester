@@ -1,4 +1,5 @@
 #include "mem.h"
+#include "printk.h"
 
 #define PAGE_PRESENT  0x1
 #define PAGE_WRITABLE 0x2
@@ -8,8 +9,8 @@
 
 void memcpy(void * dst, const void * src, uint32_t len)
 {
-    char * d = (char *) dst;
-    const char * s = (const char *) src;  
+    uint8_t * d = (uint8_t *) dst;
+    const uint8_t * s = (const uint8_t *) src;  
     for ( uint32_t i = 0; i < len; i++ ) {
         d[i] = s[i];
     }

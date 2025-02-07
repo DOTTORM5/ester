@@ -4,29 +4,32 @@
 #include "mem.h"
 #include "printk.h"
 
+static struct ext2_super_block sb; 
+
 /**
  * Ext2 superblock extractor. This function is invoked when mounting the fs
+ * @param void for now use no param, simply use the static allocated struct of this file. Need to be optimized
  * @param struct ext2_super_block * sb the superblock struct
  * @return uint8_t non-zero value for errors
  */
-uint8_t ext2_extract_sb (struct ext2_super_block * sb) 
+uint8_t ext2_extract_sb (void/*struct ext2_super_block * sb*/) 
 {
-    
+    struct ext2_super_block *sb = ext2_get_sb();
     struct block_device *dev = get_block_device();
     if (!dev) {
         printk("No block device registered!\n");
         return -1;
     }
 
-    uint8_t buffer[1024];  /* Superblock size is 1024 bytes */ 
+    uint8_t buffer[4096];  /* Superblock size is 1024 bytes, but i read the entire logic block that is 4096 bytes */ 
 
-    /* Read the superblock from logical block 1 */ 
-    if (dev->read_blocks(1, 1, buffer) != 0) {
+    /* Read the superblock from logical block 0 since each block is 4096 now */ 
+    if (dev->read_blocks(0, 1, buffer) != 0) {
         printk("Failed to read superblock\n");
         return -1;
     }
 
-    memcpy(sb, buffer, sizeof(struct ext2_super_block));
+    memcpy(sb, buffer+1024, sizeof(struct ext2_super_block));
     
     if (sb->s_magic != 0xEF53) {
         printk("Invalid EXT2 magic number: %s\n", sb->s_magic);
@@ -34,6 +37,15 @@ uint8_t ext2_extract_sb (struct ext2_super_block * sb)
     }
 
     printk("EXT2 Detected! Blocks: %d, Inodes: %d, Block Size: %d\n", sb->s_blocks_count, sb->s_inodes_count, 1024 << sb->s_log_block_size);
-    
     return 0;
 }
+
+/**
+ * Ext2 get the superblock. 
+ * @param void
+ * @return struct ext2_super_block * a pointer to the superblock
+ */
+struct ext2_super_block * ext2_get_sb(void)
+{
+    return &sb;
+}   

@@ -12,6 +12,7 @@ void itoa( int value, char * str /*, int base*/ )
         i++; 
         residual /= 10;
     } while (residual > 0);
+    str[i] = '\0'; /* Add terminator */
     strrev(str);
     return;
 }

@@ -2,7 +2,6 @@
 #include "string.h"
 #include "ascii_utils.h"
 #include "printk.h"
-// Maybe implement also this by yourself in the future 
 #include <stdarg.h> 
 
 
@@ -10,6 +9,13 @@
 static void print_char (char c)
 {
     vga_print_char(c, BLACK, RED);
+    return;
+}
+
+static void print_str(char *str)
+{
+    uint32_t i = 0; 
+    while (str[i]) print_char(str[i++]); 
     return;
 }
 
@@ -25,7 +31,7 @@ static void print_int (int value)
 /* To be tested and optimized */
 void printk (const char *str, ...)
 {
-    /* SECURITY WARNING - NEED A CHECK ON THE VA ARGS LENGTH ETC*/
+    /* WARNING - NEED A CHECK ON THE VA ARGS LENGTH ETC*/
     /* Start arg list */
     va_list arg_lst;
     va_start(arg_lst, str);
@@ -48,9 +54,13 @@ void printk (const char *str, ...)
             i++;
         }
         else if ( token == 's' ){
-            print_char(va_arg(arg_lst, int));
+            print_str((char *)va_arg(arg_lst, uint64_t));
             i++;
         } 
+        else if ( token == 'c' ) {
+            print_char(va_arg(arg_lst, int));
+            i++;
+        }
         /* Not a valid token - to be handled better */
         else {
             print_char(str[i]); 

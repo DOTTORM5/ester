@@ -17,7 +17,7 @@ struct block_device *get_block_device() {
 // AHCI-backed block device implementation
  
 #define SECTOR_SIZE 512           // AHCI typically uses 512-byte sectors
-#define LOGICAL_BLOCK_SIZE 1024   // EXT2 default block size
+#define LOGICAL_BLOCK_SIZE 4096   // EXT2 default block size, for us, but it can be also 1024 ... TODO
 
 static uint8_t ahci_read_wrapper(uint64_t lbn, uint32_t count, void *buffer) {
     uint64_t lba = (lbn * LOGICAL_BLOCK_SIZE) / SECTOR_SIZE; // Translate LBN to LBA

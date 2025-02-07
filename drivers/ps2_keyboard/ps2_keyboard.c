@@ -175,7 +175,7 @@ static uint8_t __ps2_keyboard_to_ascii(uint8_t scan_code)
     uint8_t scan_code = __ps2_keyboard_read_scan_code();
     uint8_t c = __ps2_keyboard_to_ascii(scan_code); 
 
-    if (c != 0) printk("%s", c);
+    if (c != 0) printk("%c", c);
 
     pic_send_eoi(1);
     __asm__ volatile ("sti");

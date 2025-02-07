@@ -1,6 +1,25 @@
 #include "string.h"
-#include "debug.h"
-#include "vga.h"
+
+/**
+ * Strings compare. Compares two strings
+ * @param const char *str1 a pointer to the first string to be compared
+ * @param const char *str2 a pointer to the second string to be compared
+ * @return uint8_t 0 if str1 == str2, 1 if str1 > str2, -1 if str1 < str2 
+ */
+uint8_t strcmp(const char *str1, const char *str2) 
+{
+    uint32_t i = 0; 
+    while ( str1[i] && str2[i] && (str1[i] == str2[i])) i++; 
+
+    if (str1[i] < str2[i]) { 
+        return -1;
+    } else if (str1[i] > str2[i]) {
+        return 1;
+    } else {
+        return 0; 
+    }
+
+}
 
 /* String length */
 uint32_t strlen(const char *str)

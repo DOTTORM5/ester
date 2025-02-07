@@ -4,7 +4,6 @@
 #include "kernel.h"
 #include "8259_pic.h"
 #include "utils.h"
-// #include "multiboot2_infostruct_parser.h"
 #include "pci.h"
 #include "string.h"
 #include "printk.h"
@@ -16,7 +15,8 @@
 
 void kernel_entry( uint32_t m2_info_address )
 {
-	__asm__ volatile ("cli");
+	__asm__ volatile ("sti");
+	// __asm__ volatile ("cli");
 
 	idt_init();
 
@@ -26,16 +26,19 @@ void kernel_entry( uint32_t m2_info_address )
 	ps2_keyboard_init();
 	pic_init();
 
-	__asm__ volatile ("sti");
+	// __asm__ volatile ("sti");
 
 
 	ahci_init();
 	init_block_device();
 
-	struct ext2_super_block sb; 
 
-	ext2_extract_sb(&sb);
+	ext2_extract_sb();
+	ext2_extract_bgdt();
 
+	// ext2_list_directory(2);
+	ext2_init_cwd(); 
+	ext2_change_cwd("/");
 	
 	while(1);
 

@@ -380,8 +380,8 @@ uint8_t ahci_init()
 
 uint8_t ahci_write (uint8_t port_index, uint64_t lba, uint32_t count, char *buf)
 {
-	uint32_t startl = (uint32_t) lba & 0xFFFFFFFF ;
-	uint32_t starth = (uint32_t) ( (lba & 0xFFFFFFFF00000000) >> 32 ) ;
+	uint32_t startl = (uint32_t) lba & 0xFFFFFFFF;
+	uint32_t starth = (uint32_t) ( (lba & 0xFFFFFFFF00000000) >> 32 );
 	return write(hba_mem_ptr->ports, startl, starth, count, buf);
 }
 
