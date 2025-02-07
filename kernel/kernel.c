@@ -39,7 +39,15 @@ void kernel_entry( uint32_t m2_info_address )
 	// ext2_list_directory(2);
 	ext2_init_cwd(); 
 	ext2_change_cwd("/");
-	
+
+	uint8_t file_buffer[4096];
+
+	ext2_read_file("elf_example", 0, file_buffer);
+
+	for (uint16_t i = 0; i<100; i++){
+		printk("%s ", file_buffer);
+	}
+
 	while(1);
 
 	return;

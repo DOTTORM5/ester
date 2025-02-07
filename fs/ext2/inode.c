@@ -52,7 +52,7 @@ uint8_t ext2_extract_inode(uint32_t inode_num)
     dev->read_blocks(block, 1, buffer);
 
     /* Extract inode from buffer */ 
-    memcpy(inode, buffer+inode_size, sizeof(struct ext2_inode));
+    memcpy(inode, buffer+offset, sizeof(struct ext2_inode));
 
     return 0;
 }
@@ -107,8 +107,4 @@ uint16_t ext2_list_directory(uint32_t dir_inode_num, struct ext2_dir_entry_fixed
     }
 
     return j;
-}
-
-void ext2_read_file ( char * file_name ) {
-
 }

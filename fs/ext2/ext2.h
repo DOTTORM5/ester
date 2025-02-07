@@ -117,18 +117,20 @@ struct ext2_dir_entry_fixed_name {
     /* WARNING - all the value in the struct must be little endian */
 }; 
 uint16_t ext2_list_directory(uint32_t dir_inode_num, struct ext2_dir_entry_fixed_name * dir_entries);
-
+struct ext2_inode * ext2_get_current_inode(void);
 
 /* Logical Directory structures - TODO implement differently to support also other fs */
 #define MAX_SUBDIRS    128     /* MAX number of subdirs and files in a directory */
 #define MAX_PATH_LEN   4096    /* MAX path total char length */
 #define MAX_PATH_DEPTH 10      /* MAX level in a path */
+
+/* This could be extend to include all the field associated to a directory... TODO */
 typedef struct {
     uint32_t cwd_inode_number;
     char cwd_name[MAX_PATH_LEN];
 } __cwd;
 
-
+void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr );
 void ext2_init_cwd(void);
 void ext2_change_cwd(const char * cwd_name);
 

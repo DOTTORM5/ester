@@ -81,7 +81,7 @@ void ext2_change_cwd(const char * cwd_name)
     struct ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS]; 
     uint16_t entries_count = 0;    
 
-    if (strcmp(cwd_name, "/") == 0) { /* Base case when the new cwd is the root */
+    if (strcmp(cwd_name, "/") == 0) { /* Basic case when the new cwd is the root */
         goto end;        
     } 
 
@@ -108,5 +108,59 @@ end:
 
     // printk("CWD INODE: %d\n", cwd->cwd_inode_number);
     // printk("CWD NAME: %s\n", cwd->cwd_name);
+    return;
+}
+
+
+/**
+ * Ext2 read 4096 bytes from a file in memory. 
+ * @param char * file_name the name of the file to be read
+ * @param uint32_t offset the offset in the file where to read
+ * @param uint8_t * ptr a pointer to the memory region to store the file - inout param
+ * @return void
+ */
+void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr ) 
+{
+    /* Get the current working directory */
+    __cwd * cwd = ext2_get_cwd();   
+    /* Get the block device (the storage) */
+    struct block_device *dev = get_block_device();
+
+    struct ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS];
+    
+    /* the inode number of the file */
+    uint32_t inode_file_num = 0;    
+
+    /* Try to find the file in the current working directory, for now only this situation is supported */
+    uint16_t entries_count = ext2_list_directory(cwd->cwd_inode_number, dir_entries);
+
+    for (uint16_t j = 0; j < entries_count; j++){
+        if ( strcmp(file_name, dir_entries[j].dir_name) == 0 ) {
+            inode_file_num = dir_entries[j].dir_inode;
+            break;
+        }
+    }
+
+    if (inode_file_num == 0) {
+        printk("Can't find the file in the current directory\n");
+        return;
+    }
+
+    /* Extract the inode of the file */
+    ext2_extract_inode(inode_file_num); 
+        
+    /* Get the current inode, updated above */
+    struct ext2_inode *inode = ext2_get_current_inode();
+
+    // printk("PROVALO: %d\n", inode->i_type_permission);
+
+    if ( ! (inode->i_type_permission & 0x8000) ) {
+        printk("Not a file\n");
+        return;  
+    } 
+
+    /* TODO compute the offset properly */
+    dev->read_blocks(inode->i_block[0], 1, ptr);
+    
     return;
 }
