@@ -12,6 +12,7 @@
 #include "mem.h"
 #include "block_device.h"
 #include "ext2.h"
+#include "elf64_loader.h"
 
 void kernel_entry( uint32_t m2_info_address )
 {
@@ -40,13 +41,7 @@ void kernel_entry( uint32_t m2_info_address )
 	ext2_init_cwd(); 
 	ext2_change_cwd("/");
 
-	uint8_t file_buffer[4096];
-
-	ext2_read_file("elf_example", 0, file_buffer);
-
-	for (uint16_t i = 0; i<100; i++){
-		printk("%s ", file_buffer);
-	}
+	elf64_load("elf_example");
 
 	while(1);
 

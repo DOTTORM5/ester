@@ -23,9 +23,9 @@ void exception_handler(void)
     //printk("VECTOR: %d\n", pic_get_isr());
     uint16_t vector = pic_get_isr();
 
-    // if (vector != 1 ) {
-    //     printk("VECTOR: %d\n", pic_get_isr());
-    // }
+    if (vector != 1 ) {
+        printk("VECTOR: %d\n", pic_get_isr());
+    }
     pic_send_eoi(vector-1);
     return;
 }

@@ -8,4 +8,5 @@ set(ESTER_KERNEL_SRC
     ${ESTER_DIR}/kernel/ascii_utils.c
     ${ESTER_DIR}/kernel/printk.c
     ${ESTER_DIR}/kernel/mem.c
+    ${ESTER_DIR}/kernel/elf64_loader.c
 )

@@ -160,7 +160,7 @@ void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr )
     } 
 
     /* TODO compute the offset properly */
-    dev->read_blocks(inode->i_block[0], 1, ptr);
+    dev->read_blocks(inode->i_block[offset], 1, ptr);
     
     return;
 }
