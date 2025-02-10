@@ -105,7 +105,7 @@ void elf64_load ( char * file_name )
     for ( uint16_t i = 0; i<elf64_header->e_phnum; i++ ) {
         ext2_read_file(file_name, i, buff);
         elf64_program_header = elf64_get_program_header(i);
-        map_page(elf64_program_header->p_vaddr+BASE_VMEM, elf64_program_header->p_vaddr, 0); 
+        pmap(elf64_program_header->p_vaddr+BASE_VMEM, elf64_program_header->p_vaddr, 0); 
         if ( elf64_program_header->p_segtype == 1 ) { 
             memset((uint8_t *)elf64_program_header->p_vaddr, 0x00, elf64_program_header->p_memsz);  /* Clean the memory */
             memcpy((uint8_t *)elf64_program_header->p_vaddr, buff/*+elf64_program_header->p_offset*/, elf64_program_header->p_filesz);

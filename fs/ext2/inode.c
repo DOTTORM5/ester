@@ -3,14 +3,14 @@
 #include "mem.h"
 #include "printk.h"
 
-static struct ext2_inode current_inode;
+static ext2_inode current_inode;
 
 /**
  * Ext2 get the current inode. 
  * @param void
- * @return struct ext2_inode * a pointer to the current inode
+ * @return ext2_inode * a pointer to the current inode
  */
-struct ext2_inode * ext2_get_current_inode(void)
+ext2_inode * ext2_get_current_inode(void)
 {
     return &current_inode;
 }   
@@ -23,12 +23,12 @@ struct ext2_inode * ext2_get_current_inode(void)
 uint8_t ext2_extract_inode(uint32_t inode_num) 
 {
 
-    struct ext2_inode *inode = ext2_get_current_inode();
+    ext2_inode *inode = ext2_get_current_inode();
 
     /* Get the block device (the storage) */
     struct block_device *dev = get_block_device();
     /* Get the superblock */
-    struct ext2_super_block *sb = ext2_get_sb();
+    ext2_super_block *sb = ext2_get_sb();
  
     /* Get the inode size */
     uint16_t inode_size = sb->s_inode_size;  
@@ -52,7 +52,7 @@ uint8_t ext2_extract_inode(uint32_t inode_num)
     dev->read_blocks(block, 1, buffer);
 
     /* Extract inode from buffer */ 
-    memcpy(inode, buffer+offset, sizeof(struct ext2_inode));
+    memcpy(inode, buffer+offset, sizeof(ext2_inode));
 
     return 0;
 }
@@ -60,17 +60,17 @@ uint8_t ext2_extract_inode(uint32_t inode_num)
 /**
  * Ext2 list directory. Goes through directories printing files and directories, starting from dir_inode_num 
  * @param uint32_t dir_inode_num the number of the starting inode
- * @param struct ext2_dir_entry_fixed_name * dir_entries the struct to be updated with the entries of the requested directory
+ * @param ext2_dir_entry_fixed_name * dir_entries the struct to be updated with the entries of the requested directory
  * @return uint16_t the number of entries in the requested directory
  */
-uint16_t ext2_list_directory(uint32_t dir_inode_num, struct ext2_dir_entry_fixed_name * dir_entries) 
+uint16_t ext2_list_directory(uint32_t dir_inode_num, ext2_dir_entry_fixed_name * dir_entries) 
 {
     /* Get the block device (the storage) */
     struct block_device *dev = get_block_device();
     /* Get the superblock */
-    struct ext2_super_block *sb = ext2_get_sb();
+    ext2_super_block *sb = ext2_get_sb();
 
-    struct ext2_inode *inode = ext2_get_current_inode();
+    ext2_inode *inode = ext2_get_current_inode();
     ext2_extract_inode(dir_inode_num); 
 
     /* Compute the block size */
@@ -93,11 +93,11 @@ uint16_t ext2_list_directory(uint32_t dir_inode_num, struct ext2_dir_entry_fixed
 
             if (j >= MAX_SUBDIRS) return j;
 
-            struct ext2_dir_entry* entry = (struct ext2_dir_entry*)(buffer + offset);
+            ext2_dir_entry* entry = (ext2_dir_entry*)(buffer + offset);
             
             if (entry->dir_inode == 0) break; /* Empty entry */
 
-            memcpy(dir_entries, entry, sizeof(struct ext2_dir_entry));             /* Copy the struct */
+            memcpy(dir_entries, entry, sizeof(ext2_dir_entry));             /* Copy the struct */
             memcpy(dir_entries->dir_name, entry->dir_name, entry->dir_name_len);   /* Copy the name   */
 
             offset += entry->dir_entry_size; /* Move to the next entry */

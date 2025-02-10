@@ -6,7 +6,7 @@
 
 #define MAX_GROUPS 8192  // For now we allocate an entire bgdt (block group descriptor table) in memory as static array, we need to optimize it... 
 
-static struct ext2_block_group_descriptor bgdt[MAX_GROUPS];
+static ext2_block_group_descriptor bgdt[MAX_GROUPS];
 
 /**
  * Ext2 block group descriptor table extractor. This function is invoked when mounting the fs
@@ -34,9 +34,9 @@ uint8_t ext2_extract_bgdt(void)
 /**
  * Ext2 get block group descriptor. 
  * @param uint32_t group_num the number of the block_group in the table
- * @return struct ext2_block_group_descriptor * a pointer to the group descriptor
+ * @return ext2_block_group_descriptor * a pointer to the group descriptor
  */
-struct ext2_block_group_descriptor ext2_get_bgd(uint32_t group_num)
+ext2_block_group_descriptor ext2_get_bgd(uint32_t group_num)
 {
     return bgdt[group_num];
 }   

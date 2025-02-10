@@ -2,14 +2,13 @@ global start
 extern long_mode_start
 
 section .text
-bits 32
+bits 32                         ; inform the assembler that the following is 32-bit code
 start:
     mov esp, stack_top
 
     ; check multiboot2 presence
     cmp eax, 0x36d76289
     jne .no_multiboot
-    
 
     ; Check if CPUID is supported by attempting to flip the ID bit (bit 21)
     ; in the FLAGS register. If we can flip it, CPUID is available.
@@ -82,38 +81,6 @@ start:
     jne .map_p2_table_0                    ; else map the next entry
 
     mov ecx, 0
-
-
-    ;Now map the specific address 0xFEBB1000
-    ; Step 1: Map P3 entry for the 0xF0000000 range to a new P2 table
-    ; mov eax, p2_table_1
-    ; or eax, 0b11           ; Present + Writable
-    ; mov [p3_table+24], eax   ; This maps the 0xF0000000 range to P2_1
-
-    ; Step 2: Map P2 entry for 0xFEBB1000 to a P1 table
-    ; mov eax, p1_table_0
-    ; or eax, 0b11           ; Present + Writable
-    ; mov [p2_table_1+8*0x1F5], eax   ; Map the correct P2 entry
-
-    ; Step 3: Map P1 entry for 0xFEBB1000 to the physical address
-    ; mov eax, 0xFEBB1000        ; Physical address of the AHCI BAR5
-    ; or eax, 0b11               ; Present + Writable
-    ; mov [p1_table_0 + 8*(0x1B1)], eax  ; Map 0xFEBB1000 (virtual) to 0xFEBB1000 (physical)
-
-
-
-    ; Step 2: Map P1 entry for 0xFEBB9000 to the physical address
-    ; mov eax, 0xFEBB9000        ; Physical address of the AHCI BAR5
-    ; or eax, 0b11               ; Present + Writable
-    ; mov [p1_table_0 + 8*(0x1B9)], eax  ; Map 0xFEBB9000 (virtual) to 0xFEBB9000 (physical)
-
-
-    ; Step 3: Map P1 entry for 0xFEBBB000 to the physical address
-    ; mov eax, 0xFEBBB000        ; Physical address of the AHCI BAR5
-    ; or eax, 0b11               ; Present + Writable
-    ; mov [p1_table_0 + 8*(0x1BB)], eax  ; Map 0xFEBBB000 (virtual) to 0xFEBBB000 (physical)
-
-    
 
     ; ENABLE PAGING
     ; load P4 to cr3 register (cpu uses this to access the P4 table)

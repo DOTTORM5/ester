@@ -368,7 +368,7 @@ uint8_t write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, 
 uint8_t ahci_init() 
 {
 	uint32_t ahci_phys_addr = pci_ahci_get_abar();
-	map_page(ahci_phys_addr, ahci_phys_addr, 0);
+	pmap(ahci_phys_addr, ahci_phys_addr, 0);
 	hba_mem_ptr = (HBA_MEM *) ahci_phys_addr; 
 	hba_mem_ptr->ghc |= AHCI_GHC_HR; /* Reset the controller */
 	while (hba_mem_ptr->ghc & AHCI_GHC_HR); /* Wait the reset complention */

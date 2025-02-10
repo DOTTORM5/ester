@@ -16,7 +16,7 @@
 #define	EXT2_N_BLOCKS           (EXT2_TIND_BLOCK + 1)     /* Total number of blocks           */
 
 /* ext2 superblock structure */
-struct ext2_super_block {
+typedef struct {
     uint32_t s_inodes_count;                 /* Number of inodes in the fs                              */
     uint32_t s_blocks_count;                 /* Number of blocks in the fs                              */
 	uint32_t s_r_blocks_count;               /* Number of blocks reserved for superuser                 */
@@ -47,10 +47,10 @@ struct ext2_super_block {
 	
     /* other fields not implemented for now */
     /* WARNING - all the value in the struct must be little endian */
-};
+} ext2_super_block;
 
 /* ext2 block group descriptor structure */
-struct ext2_block_group_descriptor {
+typedef struct {
     uint32_t bg_block_bitmap;                /* Block containing the block usage bitmap */
     uint32_t bg_inode_bitmap;                /* Block containing the inode usage bitmap */
     uint32_t bg_inode_table;                 /* Starting block of the inode table       */
@@ -61,10 +61,10 @@ struct ext2_block_group_descriptor {
     uint32_t bg_unused[3];                   /* Unused                                  */
 
     /* WARNING - all the value in the struct must be little endian */
-};
+} ext2_block_group_descriptor;
 
 /* ext2 directory entry structure */
-struct ext2_dir_entry {
+typedef struct {
     uint32_t dir_inode;                      /* The inode index where to find the dir content                */
     uint16_t dir_entry_size;                 /* The total size of this entry                                 */
     uint8_t  dir_name_len;                   /* Name Length least-significant 8 bits                         */
@@ -72,11 +72,11 @@ struct ext2_dir_entry {
     uint8_t  dir_name[];                     /* Dir name                                                     */ 
 
     /* WARNING - all the value in the struct must be little endian */
-}; 
+} ext2_dir_entry; 
 
 
 /* ext2 inode structure */
-struct ext2_inode {
+typedef struct {
     uint16_t i_type_permission;             /* Type and permission                                    */
     uint16_t i_user_id;                     /* Owner User ID                                          */
     uint32_t i_lower_size;                  /* Lower 32 bits of size in bytes                         */
@@ -95,19 +95,18 @@ struct ext2_inode {
     uint32_t i_dir_acl;                     /* Directory ACL                                          */
     uint32_t i_frag_block;                  /* Block address of fragment                              */
     uint32_t i_os_specific_2[3];            /* OS specific value 2                                    */
+} ext2_inode;
 
-};
-
-uint8_t ext2_extract_sb (void /*struct ext2_super_block * sb*/);
+uint8_t ext2_extract_sb (void /*ext2_super_block * sb*/);
 uint8_t ext2_extract_bgdt(void);
 uint8_t ext2_extract_inode(uint32_t inode_num);
 
-struct ext2_super_block * ext2_get_sb(void);
-struct ext2_block_group_descriptor ext2_get_bgd(uint32_t group_num); 
+ext2_super_block * ext2_get_sb(void);
+ext2_block_group_descriptor ext2_get_bgd(uint32_t group_num); 
 
 
 /* ext2 directory entry structure */
-struct ext2_dir_entry_fixed_name {
+typedef struct {
     uint32_t dir_inode;                      /* The inode index where to find the dir content                */
     uint16_t dir_entry_size;                 /* The total size of this entry                                 */
     uint8_t  dir_name_len;                   /* Name Length least-significant 8 bits                         */
@@ -115,9 +114,10 @@ struct ext2_dir_entry_fixed_name {
     uint8_t  dir_name[EXT2_NAME_LEN+1];      /* Dir name fixed now                                           */ 
 
     /* WARNING - all the value in the struct must be little endian */
-}; 
-uint16_t ext2_list_directory(uint32_t dir_inode_num, struct ext2_dir_entry_fixed_name * dir_entries);
-struct ext2_inode * ext2_get_current_inode(void);
+} ext2_dir_entry_fixed_name; 
+
+uint16_t ext2_list_directory(uint32_t dir_inode_num, ext2_dir_entry_fixed_name * dir_entries);
+ext2_inode * ext2_get_current_inode(void);
 
 /* Logical Directory structures - TODO implement differently to support also other fs */
 #define MAX_SUBDIRS    128     /* MAX number of subdirs and files in a directory */

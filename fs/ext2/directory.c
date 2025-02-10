@@ -4,7 +4,7 @@
 #include "string.h"
 #include "printk.h"
 
-__cwd cwd; 
+static __cwd cwd; 
 
 /**
  * Ext2 get the current working directory. 
@@ -78,7 +78,7 @@ void ext2_change_cwd(const char * cwd_name)
 
     /* Find the new inode number */
     uint32_t inode_dir_num = 2; /* start from the root dir */
-    struct ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS]; 
+    ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS]; 
     uint16_t entries_count = 0;    
 
     if (strcmp(cwd_name, "/") == 0) { /* Basic case when the new cwd is the root */
@@ -126,7 +126,7 @@ void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr )
     /* Get the block device (the storage) */
     struct block_device *dev = get_block_device();
 
-    struct ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS];
+    ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS];
     
     /* the inode number of the file */
     uint32_t inode_file_num = 0;    
@@ -150,7 +150,7 @@ void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr )
     ext2_extract_inode(inode_file_num); 
         
     /* Get the current inode, updated above */
-    struct ext2_inode *inode = ext2_get_current_inode();
+    ext2_inode *inode = ext2_get_current_inode();
 
     // printk("PROVALO: %d\n", inode->i_type_permission);
 
