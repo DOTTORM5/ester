@@ -126,7 +126,7 @@ void elf64_load ( char * file_name )
     __asm__("pushq $0x000000000010015c");
     __asm__("jmp 0x401000"); 
 
-    // printk("AFTER JUMPING!!!\n");
+    printk("AFTER JUMPING!!!\n");
 
     return; 
 }

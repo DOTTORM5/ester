@@ -3,14 +3,14 @@
 #include "mem.h"
 #include "printk.h"
 
-static ext2_inode current_inode;
+static ext2_inode_t current_inode;
 
 /**
  * Ext2 get the current inode. 
  * @param void
- * @return ext2_inode * a pointer to the current inode
+ * @return ext2_inode_t * a pointer to the current inode
  */
-ext2_inode * ext2_get_current_inode(void)
+ext2_inode_t * ext2_get_current_inode(void)
 {
     return &current_inode;
 }   
@@ -18,12 +18,12 @@ ext2_inode * ext2_get_current_inode(void)
 /**
  * Ext2 inode extractor. Reads the inode indexed by inode_num on demand 
  * @param uint32_t inode_num the number of the inode
- * @return uint8_t non-zero value in case of errors
+ * @return ext2_inode_t * a pointer to the extracted (now current) inode
  */
-uint8_t ext2_extract_inode(uint32_t inode_num) 
+ext2_inode_t * ext2_extract_inode(uint32_t inode_num) 
 {
 
-    ext2_inode *inode = ext2_get_current_inode();
+    ext2_inode_t *inode = ext2_get_current_inode();
 
     /* Get the block device (the storage) */
     struct block_device *dev = get_block_device();
@@ -52,9 +52,9 @@ uint8_t ext2_extract_inode(uint32_t inode_num)
     dev->read_blocks(block, 1, buffer);
 
     /* Extract inode from buffer */ 
-    memcpy(inode, buffer+offset, sizeof(ext2_inode));
+    memcpy(inode, buffer+offset, sizeof(ext2_inode_t));
 
-    return 0;
+    return inode;
 }
 
 /**
@@ -70,7 +70,7 @@ uint16_t ext2_list_directory(uint32_t dir_inode_num, ext2_dir_entry_fixed_name *
     /* Get the superblock */
     ext2_super_block *sb = ext2_get_sb();
 
-    ext2_inode *inode = ext2_get_current_inode();
+    ext2_inode_t *inode = ext2_get_current_inode();
     ext2_extract_inode(dir_inode_num); 
 
     /* Compute the block size */

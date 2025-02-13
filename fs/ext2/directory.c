@@ -111,6 +111,35 @@ end:
     return;
 }
 
+/**
+ * Ext2 Inode number find. Find the inode number of a given pathname, this works with both dir and file
+ * @param const char * pathname the path of the file/dir of which to find the inode 
+ * @return uint32_t the inode number
+ */
+uint32_t ext2_inode_find ( const char * pathname ) 
+{
+    char unpacked_path [MAX_PATH_DEPTH][EXT2_NAME_LEN+2];  /* +2 because one is for the null terminator and one is for the / char */
+    uint16_t path_depth = unpack_dir_path(pathname, unpacked_path);
+
+    /* Find the new inode number */
+    uint32_t inode_num = 2; /* start from the root dir */
+    ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS]; 
+    uint16_t entries_count = 0;    
+
+    if (strcmp(pathname, "/") == 0) { /* Basic case when the pathname is the root */
+        return inode_num;         
+    } 
+    for (uint16_t i = 1; i < path_depth; i++){
+        entries_count = ext2_list_directory(inode_num, dir_entries); 
+        for (uint16_t j = 0; j < entries_count; j++){
+            if ( strcmp(unpacked_path[i], dir_entries[j].dir_name) == 0 ) {
+                inode_num = dir_entries[j].dir_inode;
+                break;
+            }
+        }
+    }
+    return inode_num; 
+}
 
 /**
  * Ext2 read 4096 bytes from a file in memory. 
@@ -150,9 +179,7 @@ void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr )
     ext2_extract_inode(inode_file_num); 
         
     /* Get the current inode, updated above */
-    ext2_inode *inode = ext2_get_current_inode();
-
-    // printk("PROVALO: %d\n", inode->i_type_permission);
+    ext2_inode_t *inode = ext2_get_current_inode();
 
     if ( ! (inode->i_type_permission & 0x8000) ) {
         printk("Not a file\n");

@@ -95,11 +95,12 @@ typedef struct {
     uint32_t i_dir_acl;                     /* Directory ACL                                          */
     uint32_t i_frag_block;                  /* Block address of fragment                              */
     uint32_t i_os_specific_2[3];            /* OS specific value 2                                    */
-} ext2_inode;
+} ext2_inode_t;
 
 uint8_t ext2_extract_sb (void /*ext2_super_block * sb*/);
 uint8_t ext2_extract_bgdt(void);
-uint8_t ext2_extract_inode(uint32_t inode_num);
+ext2_inode_t * ext2_extract_inode(uint32_t inode_num);
+
 
 ext2_super_block * ext2_get_sb(void);
 ext2_block_group_descriptor ext2_get_bgd(uint32_t group_num); 
@@ -117,7 +118,7 @@ typedef struct {
 } ext2_dir_entry_fixed_name; 
 
 uint16_t ext2_list_directory(uint32_t dir_inode_num, ext2_dir_entry_fixed_name * dir_entries);
-ext2_inode * ext2_get_current_inode(void);
+ext2_inode_t * ext2_get_current_inode(void);
 
 /* Logical Directory structures - TODO implement differently to support also other fs */
 #define MAX_SUBDIRS    128     /* MAX number of subdirs and files in a directory */
@@ -133,5 +134,17 @@ typedef struct {
 void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr );
 void ext2_init_cwd(void);
 void ext2_change_cwd(const char * cwd_name);
+
+uint32_t ext2_inode_find ( const char * pathname ); 
+
+
+typedef struct {
+    uint32_t inode_num;  /* The inode number of the file */
+    const char mode[2];  /* The file mode, read, write etc. */
+    uint8_t open;        /* If the file is open */
+    ext2_inode_t inode;  /* The inode of the file */
+    uint32_t pos;        /* The byte position actual accessed */
+
+} ext2_file_t; 
 
 #endif // EXT2_H 
