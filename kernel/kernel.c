@@ -37,11 +37,16 @@ void kernel_entry( uint32_t m2_info_address )
 	ext2_extract_sb();
 	ext2_extract_bgdt();
 
-	// ext2_list_directory(2);
-	ext2_init_cwd(); 
-	ext2_change_cwd("/");
+	ext2_dir_entry_fixed_name dir_entries[30];
+	ext2_list_directory(2, dir_entries);
+	// ext2_init_cwd(); 
+	// ext2_change_cwd("/");
 
-	elf64_load("elf_example");
+	// elf64_load("elf_example");
+
+	ext2_file_t * file =  ext2_fopen("/prova/prova", "w");
+
+	ext2_fclose(file); 
 
 	while(1);
 

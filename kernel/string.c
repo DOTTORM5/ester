@@ -21,6 +21,16 @@ uint8_t strcmp(const char *str1, const char *str2)
 
 }
 
+char * strncat (char * dst, const char * src, uint32_t n)
+{
+    uint32_t dst_i = strlen(dst); 
+    for (uint32_t i = 0; i<n; i++) {
+        dst[dst_i++] = src[i]; 
+    }
+    dst[dst_i] = '\0';
+    return dst;
+}
+
 /* String length */
 uint32_t strlen(const char *str)
 {   

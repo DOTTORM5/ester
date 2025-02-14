@@ -125,6 +125,8 @@ ext2_inode_t * ext2_get_current_inode(void);
 #define MAX_PATH_LEN   4096    /* MAX path total char length */
 #define MAX_PATH_DEPTH 10      /* MAX level in a path */
 
+#define BUFF_SIZE 4096        /* The buffer size of a file */
+
 /* This could be extend to include all the field associated to a directory... TODO */
 typedef struct {
     uint32_t cwd_inode_number;
@@ -135,16 +137,25 @@ void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr );
 void ext2_init_cwd(void);
 void ext2_change_cwd(const char * cwd_name);
 
-uint32_t ext2_inode_find ( const char * pathname ); 
+uint32_t ext2_inode_find ( const char * pathname ) ;
 
+uint16_t unpack_dir_path(const char * dir_path, char unpacked_path[MAX_PATH_DEPTH][EXT2_NAME_LEN+2]);
 
 typedef struct {
-    uint32_t inode_num;  /* The inode number of the file */
-    const char mode[2];  /* The file mode, read, write etc. */
-    uint8_t open;        /* If the file is open */
-    ext2_inode_t inode;  /* The inode of the file */
-    uint32_t pos;        /* The byte position actual accessed */
+    uint32_t inode_num;             /* The inode number of the file */
+    const char mode[2];             /* The file mode, read, write etc. */
+    uint8_t open;                   /* If the file is open */
+    uint32_t pos;                   /* The byte position actual accessed */
+    uint8_t dirty;                  /* The file is dirty, need to be saved on the disk */
+    uint8_t exist;                  /* The file exist on the disk */
+    char pathname[MAX_PATH_LEN];    /* The pathname of the file */ 
+    char buff[BUFF_SIZE];           /* Buffer the file content */ 
+    ext2_inode_t inode;             /* The inode of the file */
 
 } ext2_file_t; 
+
+ext2_file_t * ext2_fopen( const char * pathname, const char * mode ) ;
+uint8_t ext2_fclose( ext2_file_t * f ) ;
+
 
 #endif // EXT2_H 

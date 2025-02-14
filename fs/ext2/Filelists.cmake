@@ -3,6 +3,7 @@ set(EXT2
     ${ESTER_DIR}/fs/ext2/group.c 
     ${ESTER_DIR}/fs/ext2/inode.c 
     ${ESTER_DIR}/fs/ext2/directory.c 
+    ${ESTER_DIR}/fs/ext2/file.c 
 )
 
 include_directories(

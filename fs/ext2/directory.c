@@ -35,7 +35,7 @@ void ext2_init_cwd(void)
  * @param char unpacked_path[][] the final unpacked path, each entry is a dir in the path 
  * @return uint16_t the number of directories in the path (the path depth)
  */
-static uint16_t unpack_dir_path(const char * dir_path, char unpacked_path[MAX_PATH_DEPTH][EXT2_NAME_LEN+2])
+uint16_t unpack_dir_path(const char * dir_path, char unpacked_path[MAX_PATH_DEPTH][EXT2_NAME_LEN+2])
 {
     uint32_t i = 0; 
     uint32_t j = 0; 
@@ -123,6 +123,7 @@ uint32_t ext2_inode_find ( const char * pathname )
 
     /* Find the new inode number */
     uint32_t inode_num = 2; /* start from the root dir */
+    uint32_t old_inode_num = inode_num; /* To keep track of the old inode in case no name is matched */
     ext2_dir_entry_fixed_name dir_entries[MAX_SUBDIRS]; 
     uint16_t entries_count = 0;    
 
@@ -130,12 +131,18 @@ uint32_t ext2_inode_find ( const char * pathname )
         return inode_num;         
     } 
     for (uint16_t i = 1; i < path_depth; i++){
+        old_inode_num = inode_num; 
+
         entries_count = ext2_list_directory(inode_num, dir_entries); 
         for (uint16_t j = 0; j < entries_count; j++){
             if ( strcmp(unpacked_path[i], dir_entries[j].dir_name) == 0 ) {
                 inode_num = dir_entries[j].dir_inode;
                 break;
             }
+        }
+        /* The inode is the same, not found a valid dir o file */
+        if ( old_inode_num == inode_num ) {
+            break; 
         }
     }
     return inode_num; 
