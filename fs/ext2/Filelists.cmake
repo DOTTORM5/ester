@@ -4,6 +4,7 @@ set(EXT2
     ${ESTER_DIR}/fs/ext2/inode.c 
     ${ESTER_DIR}/fs/ext2/directory.c 
     ${ESTER_DIR}/fs/ext2/file.c 
+    ${ESTER_DIR}/fs/ext2/device.c 
 )
 
 include_directories(

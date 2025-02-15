@@ -38,7 +38,7 @@ ext2_inode_t * ext2_extract_inode(uint32_t inode_num)
     uint32_t index = (inode_num - 1) % sb->s_inodes_per_group;
     
     /* Locate the inode table block */ 
-    uint32_t inode_table_block = ext2_get_bgd(group).bg_inode_table;
+    uint32_t inode_table_block = ext2_get_bgd(group)->bg_inode_table;
 
     /* Compute the block size */
     uint32_t block_size = 1024 << sb->s_log_block_size;

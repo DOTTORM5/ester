@@ -103,7 +103,7 @@ ext2_inode_t * ext2_extract_inode(uint32_t inode_num);
 
 
 ext2_super_block * ext2_get_sb(void);
-ext2_block_group_descriptor ext2_get_bgd(uint32_t group_num); 
+ext2_block_group_descriptor * ext2_get_bgd(uint32_t group_num);
 
 
 /* ext2 directory entry structure */
@@ -146,6 +146,7 @@ typedef struct {
     const char mode[2];             /* The file mode, read, write etc. */
     uint8_t open;                   /* If the file is open */
     uint32_t pos;                   /* The byte position actual accessed */
+    uint32_t new_bytes_count;        /* Number of new bytes from pos */
     uint8_t dirty;                  /* The file is dirty, need to be saved on the disk */
     uint8_t exist;                  /* The file exist on the disk */
     char pathname[MAX_PATH_LEN];    /* The pathname of the file */ 
@@ -156,6 +157,16 @@ typedef struct {
 
 ext2_file_t * ext2_fopen( const char * pathname, const char * mode ) ;
 uint8_t ext2_fclose( ext2_file_t * f ) ;
+uint8_t ext2_fwrite( ext2_file_t * f, uint8_t * buff, uint32_t size );
+uint8_t ext2_fseek( ext2_file_t * f, uint32_t new_pos ) ;
+
+
+uint8_t ext2_read_block( uint32_t block_id, uint8_t * buff ); 
+uint8_t ext2_write_block( uint32_t block_id, uint8_t * buff );
+
+
+uint8_t ext2_write_sb (void) ;
+uint8_t ext2_write_bgdt(void);
 
 
 #endif // EXT2_H 

@@ -7,9 +7,18 @@
 static ext2_super_block sb; 
 
 /**
+ * Ext2 get the superblock. 
+ * @param void
+ * @return ext2_super_block * a pointer to the superblock
+ */
+ext2_super_block * ext2_get_sb(void)
+{
+    return &sb;
+}   
+
+/**
  * Ext2 superblock extractor. This function is invoked when mounting the fs
  * @param void for now use no param, simply use the static allocated struct of this file. Need to be optimized
- * @param ext2_super_block * sb the superblock struct
  * @return uint8_t non-zero value for errors
  */
 uint8_t ext2_extract_sb (void/*ext2_super_block * sb*/) 
@@ -41,11 +50,24 @@ uint8_t ext2_extract_sb (void/*ext2_super_block * sb*/)
 }
 
 /**
- * Ext2 get the superblock. 
+ * Ext2 superblock write. This function save the superblock back on the disk
  * @param void
- * @return ext2_super_block * a pointer to the superblock
+ * @return uint8_t non-zero value for errors
  */
-ext2_super_block * ext2_get_sb(void)
+uint8_t ext2_write_sb (void) 
 {
-    return &sb;
-}   
+    ext2_super_block *sb = ext2_get_sb();
+    uint32_t block_size = 1024 << sb->s_log_block_size;
+    uint8_t buffer[block_size]; 
+
+    /* Read the superblock from logical block 0 since each block is 4096 now */ 
+    if (ext2_read_block(0, buffer) != 0) {
+        printk("Failed to read superblock\n");
+        return 1;
+    }
+
+    /* Copy the superblock in the right position of the block buffer */
+    memcpy(buffer+1024, sb, sizeof(ext2_super_block));
+    ext2_write_block(0, buffer); 
+    return 0;
+}
