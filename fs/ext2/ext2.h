@@ -47,7 +47,7 @@ typedef struct {
 	
     /* other fields not implemented for now */
     /* WARNING - all the value in the struct must be little endian */
-} ext2_super_block;
+} ext2_super_block_t;
 
 /* ext2 block group descriptor structure */
 typedef struct {
@@ -61,7 +61,7 @@ typedef struct {
     uint32_t bg_unused[3];                   /* Unused                                  */
 
     /* WARNING - all the value in the struct must be little endian */
-} ext2_block_group_descriptor;
+} ext2_block_group_descriptor_t;
 
 /* ext2 directory entry structure */
 typedef struct {
@@ -72,7 +72,7 @@ typedef struct {
     uint8_t  dir_name[];                     /* Dir name                                                     */ 
 
     /* WARNING - all the value in the struct must be little endian */
-} ext2_dir_entry; 
+} ext2_dir_entry_t; 
 
 
 /* ext2 inode structure */
@@ -97,13 +97,12 @@ typedef struct {
     uint32_t i_os_specific_2[3];            /* OS specific value 2                                    */
 } ext2_inode_t;
 
-uint8_t ext2_extract_sb (void /*ext2_super_block * sb*/);
+uint8_t ext2_extract_sb (void /*ext2_super_block_t * sb*/);
+uint32_t ext2_get_block_size(void);
+uint32_t ext2_get_inodes_per_group(void);
 uint8_t ext2_extract_bgdt(void);
-ext2_inode_t * ext2_extract_inode(uint32_t inode_num);
-
-
-ext2_super_block * ext2_get_sb(void);
-ext2_block_group_descriptor * ext2_get_bgd(uint32_t group_num);
+uint32_t ext2_get_inode_size(void);
+ext2_block_group_descriptor_t * ext2_get_bgd(uint32_t group_num);
 
 
 /* ext2 directory entry structure */
@@ -115,10 +114,15 @@ typedef struct {
     uint8_t  dir_name[EXT2_NAME_LEN+1];      /* Dir name fixed now                                           */ 
 
     /* WARNING - all the value in the struct must be little endian */
-} ext2_dir_entry_fixed_name; 
+} ext2_dir_entry_fixed_name_t; 
 
-uint16_t ext2_list_directory(uint32_t dir_inode_num, ext2_dir_entry_fixed_name * dir_entries);
 ext2_inode_t * ext2_get_current_inode(void);
+ext2_inode_t * ext2_extract_inode(uint32_t inode_num);
+uint32_t ext2_free_inode_alloc( uint32_t group );
+uint32_t ext2_free_block_alloc( uint32_t group );
+void ext2_inode_write(uint32_t inode_num, ext2_inode_t * inode);
+uint32_t ext2_inode_find ( const char * pathname ) ;
+
 
 /* Logical Directory structures - TODO implement differently to support also other fs */
 #define MAX_SUBDIRS    128     /* MAX number of subdirs and files in a directory */
@@ -131,14 +135,12 @@ ext2_inode_t * ext2_get_current_inode(void);
 typedef struct {
     uint32_t cwd_inode_number;
     char cwd_name[MAX_PATH_LEN];
-} __cwd;
+} cwd_t;
 
-void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr );
+uint16_t ext2_list_directory(uint32_t dir_inode_num, ext2_dir_entry_fixed_name_t * dir_entries);
 void ext2_init_cwd(void);
 void ext2_change_cwd(const char * cwd_name);
-
-uint32_t ext2_inode_find ( const char * pathname ) ;
-
+uint8_t ext2_add_dir_entry (ext2_inode_t * dir_inode, uint32_t new_entry_inode_num, const char * new_entry_name);
 uint16_t unpack_dir_path(const char * dir_path, char unpacked_path[MAX_PATH_DEPTH][EXT2_NAME_LEN+2]);
 
 typedef struct {
@@ -165,8 +167,6 @@ uint8_t ext2_fread( ext2_file_t * f, uint8_t * buff, uint32_t size ) ;
 uint8_t ext2_read_block( uint32_t block_id, uint8_t * buff ); 
 uint8_t ext2_write_block( uint32_t block_id, uint8_t * buff );
 
-
-uint8_t ext2_write_sb (void) ;
 uint8_t ext2_write_bgdt(void);
 
 

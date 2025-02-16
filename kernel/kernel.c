@@ -37,34 +37,31 @@ void kernel_entry( uint32_t m2_info_address )
 	ext2_extract_sb();
 	ext2_extract_bgdt();
 
-	ext2_dir_entry_fixed_name dir_entries[30];
+	ext2_dir_entry_fixed_name_t dir_entries[30];
 	ext2_list_directory(2, dir_entries);
 
-	ext2_file_t * file =  ext2_fopen("/prova2", "w");
+	ext2_file_t * file =  ext2_fopen("/prova", "w");
 
 	uint8_t buffer[4096];
-
 	memset(buffer, 0x61, 4096); 
 	ext2_fwrite(file, buffer, 4096); 
-
 	ext2_fseek(file, 10); 
-
 	memset(&buffer, 0x62, 4096); 
 	ext2_fwrite(file, buffer, 4096); 
-
 	uint8_t read_buffer[4096];
-
-	// ext2_fseek(file, 0); 
-
 	ext2_fread(file, read_buffer, 4096); 
-
-	
-
-	for ( uint32_t i = 0; i < 20; i++ ){
-		printk("%c", read_buffer[i]);
-	}
-
 	ext2_fclose(file); 
+	
+	printk("\n\n\n");
+	printk("                                 Welcome to\n\n\n");
+	printk("                              _______________\n");
+	printk("                             |               |\n");
+	printk("                             |  ESTER OS !!! |\n");
+	printk("                             |_______________|\n\n\n\n");
+	printk("                                                 \n");
+	printk("                          Everything will be fine\n");
+
+
 	while(1);
 
 	return;

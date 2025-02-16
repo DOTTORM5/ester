@@ -22,7 +22,7 @@ typedef struct {
 	uint16_t   e_shnum;                /* Number of entries in the section header table    */
 	uint16_t   e_shstrndx;             /* Section index to the section header string table */
 
-} __elf64_header; 
+} elf64_header_t; 
 
 
 
@@ -35,11 +35,11 @@ typedef struct {
 	uint64_t p_filesz;      /* Size of the segment in the file                                      */
 	uint64_t p_memsz;       /* Size of the segment in memory (p_memsz, at least as big as p_filesz) */
 	uint64_t p_align;       /* The required alignment for this section (usually a power of 2)       */ 
-} __elf64_program_header; 
+} elf64_program_header_t; 
 
 
 
-__elf64_header * elf64_get_header(void); 
+elf64_header_t * elf64_get_header(void); 
 void elf64_extract_header (uint8_t * ptr);  
 void elf64_load ( char * file_name ); 
 

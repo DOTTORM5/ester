@@ -7,7 +7,7 @@
 
 /* This containts all pci_devices in terms of bus|dev|func, this should be a vector dinamically allocated, but we don't have heap strategy implemented yet, we wrongly give it a fixed size for now */
 static struct {
-    __pci_dev pci_devices[PCI_MAX_DEVICES];
+    pci_dev_t pci_devices[PCI_MAX_DEVICES];
     uint16_t pci_devices_cnt;     /* Effective number of pci_devices */
 } pci_vector_devices;
 
@@ -18,39 +18,39 @@ static struct {
 /* | Enable (bit31) | Reserved (bit30-24) | Bus Num (bit23-16) | Device Num (bit15-11) | Function Num (bit10-8) | Register offset (bit7-0) */
 /* There are a maximum of 256 byte for each PCI device (function) register, last two bit always 00, we access 32 bits */
 
-/*static*/ uint32_t pci_read_config_long(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset)
+static uint32_t pci_read_config_long(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset)
 {
     uint32_t address =  (uint32_t) (((uint32_t)bus) << 16) | (((uint32_t)device) << 11 ) | (((uint32_t)function) << 8 ) | (offset & 0xFC) | ((uint32_t) 0x80000000);
     outl(PCI_CONFIG_ADDRESS_PORT, address);
     return inl(PCI_CONFIG_DATA_PORT);
 }
 
-/*static*/ uint16_t pci_get_vendor_id(uint8_t bus, uint8_t device, uint8_t function)
+static uint16_t pci_get_vendor_id(uint8_t bus, uint8_t device, uint8_t function)
 {
     return ( (uint16_t) (pci_read_config_long(bus, device, function, 0x00) & 0x0000FFFF) );
 }
 
-/*static*/ uint8_t pci_get_header_type(uint8_t bus, uint8_t device, uint8_t function)
+static uint8_t pci_get_header_type(uint8_t bus, uint8_t device, uint8_t function)
 {
     return ( (uint8_t) ((pci_read_config_long(bus, device, function, 0x0C) & 0x00FF0000) >> 16));
 }
 
-/*static*/ uint8_t pci_get_class_code(uint8_t bus, uint8_t device, uint8_t function)
+static uint8_t pci_get_class_code(uint8_t bus, uint8_t device, uint8_t function)
 {
     return ((uint8_t) ( ( pci_read_config_long(bus,device,function, 0x08) & 0xFF000000)  >> 24));
 }
 
-/*static*/ uint8_t pci_get_sub_class_code(uint8_t bus, uint8_t device, uint8_t function)
+static uint8_t pci_get_sub_class_code(uint8_t bus, uint8_t device, uint8_t function)
 {
     return ((uint8_t) ( ( pci_read_config_long(bus,device,function, 0x08) & 0x00FF0000)  >> 16));
 }
 
-/*static*/ uint8_t pci_get_prog_if_code(uint8_t bus, uint8_t device, uint8_t function)
+static uint8_t pci_get_prog_if_code(uint8_t bus, uint8_t device, uint8_t function)
 {
     return ((uint8_t) ( ( pci_read_config_long(bus,device,function, 0x08) & 0x0000FF00)  >> 8));
 }
 
-/*static*/ uint8_t pci_get_secondary_bus(uint8_t bus, uint8_t device, uint8_t function)
+static uint8_t pci_get_secondary_bus(uint8_t bus, uint8_t device, uint8_t function)
 {
     return ( (uint8_t) ((pci_read_config_long(bus, device, function, 0x18 ) & 0x0000FF00) >> 8));
 }
@@ -64,9 +64,9 @@ void pci_vector_dev_init(void)
     return;
 }
 
-/*static*/ __pci_dev pci_dev_create(uint8_t bus, uint8_t device, uint8_t function)
+static pci_dev_t pci_dev_create(uint8_t bus, uint8_t device, uint8_t function)
 {
-    __pci_dev pci_dev = {bus, device, function};
+    pci_dev_t pci_dev = {bus, device, function};
     return pci_dev;
 }
 
@@ -75,7 +75,7 @@ uint16_t pci_vector_dev_cnt(void)
     return pci_vector_devices.pci_devices_cnt;
 }
 
-__pci_dev pci_vector_dev_get(uint16_t index)
+pci_dev_t pci_vector_dev_get(uint16_t index)
 {
     uint16_t cnt = pci_vector_dev_cnt();
     if ( cnt == 0 ) {
@@ -107,7 +107,30 @@ uint8_t pci_vector_dev_add(uint8_t bus, uint8_t device, uint8_t function)
 /* We're assuming that UEFI BIOS already configured PCI-to-PCI bridges */
 /* We adopt a recursive scan, well exploring the PCI tree */
 
-/*static*/ void pci_function_scan(uint8_t bus, uint8_t device, uint8_t function)
+void pci_device_scan(uint8_t bus, uint8_t device)
+{
+    uint8_t function = 0;
+    if ( pci_get_vendor_id(bus, device, function) == PCI_NO_VENDOR ) return;
+    pci_function_scan(bus, device, function);
+    if (pci_get_header_type(bus, device, function) & 0x80) { /* There are multiple functions */
+        for (function = 1; function < PCI_MAX_FUNCTIONS_PER_DEVICE; function++) {
+            if( pci_get_vendor_id(bus, device, function) != PCI_NO_VENDOR ) {
+                pci_function_scan(bus, device, function);
+            }
+        }
+    }
+    return;
+}
+
+void pci_bus_scan(uint8_t bus)
+{
+    for (uint8_t i = 0; i < PCI_MAX_DEVICES_PER_BUS; i++ ) {
+        pci_device_scan(bus, i);
+    }
+    return;
+}
+
+void pci_function_scan(uint8_t bus, uint8_t device, uint8_t function)
 {
     uint8_t class_code;
     uint8_t sub_class_code;
@@ -125,28 +148,6 @@ uint8_t pci_vector_dev_add(uint8_t bus, uint8_t device, uint8_t function)
     return;
 }
 
-/*static*/ void pci_device_scan(uint8_t bus, uint8_t device)
-{
-    uint8_t function = 0;
-    if ( pci_get_vendor_id(bus, device, function) == PCI_NO_VENDOR ) return;
-    pci_function_scan(bus, device, function);
-    if (pci_get_header_type(bus, device, function) & 0x80) { /* There are multiple functions */
-        for (function = 1; function < PCI_MAX_FUNCTIONS_PER_DEVICE; function++) {
-            if( pci_get_vendor_id(bus, device, function) != PCI_NO_VENDOR ) {
-                pci_function_scan(bus, device, function);
-            }
-        }
-    }
-    return;
-}
-
-/*static*/ void pci_bus_scan(uint8_t bus)
-{
-    for (uint8_t i = 0; i < PCI_MAX_DEVICES_PER_BUS; i++ ) {
-        pci_device_scan(bus, i);
-    }
-    return;
-}
 
 void pci_recursive_scan(void)
 {

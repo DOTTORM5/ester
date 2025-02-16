@@ -9,7 +9,7 @@
 typedef struct {
     uint32_t total_size;
     uint32_t reserved;
-} __attribute__((aligned(0x8))) __fixed_tag;
+} __attribute__((aligned(0x8))) fixed_tag_t;
 
 typedef struct {
     uint32_t type;
@@ -17,10 +17,10 @@ typedef struct {
     uint32_t mod_start;
     uint32_t mod_end;
     uint8_t * string;
-} __attribute__((aligned(0x8))) __module_tag;
+} __attribute__((aligned(0x8))) module_tag_t;
 
 
-__module_tag * multiboot2_parser(uint32_t base_address); 
+module_tag_t * multiboot2_parser(uint32_t base_address); 
 
 
 

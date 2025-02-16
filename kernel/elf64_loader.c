@@ -5,15 +5,15 @@
 
 #define BASE_VMEM 2147483648     /* 2 GB ... TODO very ugly */
 
-static __elf64_header elf64_header;
-static __elf64_program_header elf64_program_headers[128]; 
+static elf64_header_t elf64_header;
+static elf64_program_header_t elf64_program_headers[128]; 
 
 /**
  * Elf64 get the current elf64_header. 
  * @param void
- * @return __elf64_header * a pointer to the current elf64_header
+ * @return elf64_header_t * a pointer to the current elf64_header
  */
-__elf64_header * elf64_get_header(void)
+elf64_header_t * elf64_get_header(void)
 {
     return &elf64_header;
 } 
@@ -21,9 +21,9 @@ __elf64_header * elf64_get_header(void)
 /**
  * Elf64 get an entry in the program headers table. 
  * @param uint16_t index the indez in the program headers table
- * @return __elf64_program_header * a pointer to the required program header
+ * @return elf64_program_header_t * a pointer to the required program header
  */
-__elf64_program_header * elf64_get_program_header(uint16_t index)
+elf64_program_header_t * elf64_get_program_header(uint16_t index)
 {
     return &elf64_program_headers[index];
 }
@@ -35,8 +35,8 @@ __elf64_program_header * elf64_get_program_header(uint16_t index)
  */
 void elf64_extract_header (uint8_t * ptr) 
 {
-    __elf64_header * elf64_header = elf64_get_header(); 
-    memcpy(elf64_header, ptr, sizeof(__elf64_header)); 
+    elf64_header_t * elf64_header = elf64_get_header(); 
+    memcpy(elf64_header, ptr, sizeof(elf64_header_t)); 
     return;
 }
 
@@ -48,8 +48,8 @@ void elf64_extract_header (uint8_t * ptr)
  */
 void elf64_extract_program_header (uint8_t * ptr, uint16_t index) 
 {
-    __elf64_program_header * elf64_program_header = elf64_get_program_header(index); 
-    memcpy(elf64_program_header, ptr, sizeof(__elf64_program_header)); 
+    elf64_program_header_t * elf64_program_header = elf64_get_program_header(index); 
+    memcpy(elf64_program_header, ptr, sizeof(elf64_program_header_t)); 
     return;
 }
 
@@ -69,10 +69,10 @@ void stub (void)
 void elf64_load ( char * file_name )
 {
     uint8_t buff[4096];
-    ext2_read_file(file_name, 0, buff);
+    // ext2_read_file(file_name, 0, buff);
     
     elf64_extract_header(buff);
-    __elf64_header * elf64_header = elf64_get_header();
+    elf64_header_t * elf64_header = elf64_get_header();
 
     if ( ! ((uint32_t)elf64_header->e_ident & ELF_MAGIC) ) {
         printk("Not a valid ELF\n");
@@ -89,7 +89,7 @@ void elf64_load ( char * file_name )
 
     printk("Entries count %d\n", elf64_header->e_phnum);
 
-    __elf64_program_header * elf64_program_header = elf64_get_program_header(1);
+    elf64_program_header_t * elf64_program_header = elf64_get_program_header(1);
 
     printk("Program header p_segtype: %d\n", elf64_program_header->p_segtype);
     printk("Program header p_flags: %d\n", elf64_program_header->p_flags);
@@ -103,7 +103,7 @@ void elf64_load ( char * file_name )
     uint8_t * data; 
 
     for ( uint16_t i = 0; i<elf64_header->e_phnum; i++ ) {
-        ext2_read_file(file_name, i, buff);
+        // ext2_read_file(file_name, i, buff);
         elf64_program_header = elf64_get_program_header(i);
         pmap(elf64_program_header->p_vaddr+BASE_VMEM, elf64_program_header->p_vaddr, 0); 
         if ( elf64_program_header->p_segtype == 1 ) { 

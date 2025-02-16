@@ -3,7 +3,7 @@ ENTRY(start)
 
 SECTIONS
 {
-	/* we need 1MB of space atleast (for the DEVICE? for what?) */
+	/* we need 1MB of space at least */
 	. = 1M;
 
   	/* text section */

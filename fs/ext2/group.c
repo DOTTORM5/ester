@@ -6,16 +6,16 @@
 
 #define MAX_GROUPS 128  // For now we allocate an entire bgdt (block group descriptor table) in memory as static array, we need to optimize it... 
 
-static ext2_block_group_descriptor bgdt[MAX_GROUPS];
+static ext2_block_group_descriptor_t __bgdt[MAX_GROUPS];
 
 /**
  * Ext2 get block group descriptor. 
  * @param uint32_t group_num the number of the block_group in the table
- * @return ext2_block_group_descriptor * a pointer to the group descriptor
+ * @return ext2_block_group_descriptor_t * a pointer to the group descriptor
  */
-ext2_block_group_descriptor * ext2_get_bgd(uint32_t group_num)
+ext2_block_group_descriptor_t * ext2_get_bgd(uint32_t group_num)
 {
-    return &bgdt[group_num];
+    return &__bgdt[group_num];
 }   
 
 /**
@@ -25,13 +25,11 @@ ext2_block_group_descriptor * ext2_get_bgd(uint32_t group_num)
  */
 uint8_t ext2_extract_bgdt(void)
 {
-    ext2_super_block * sb = ext2_get_sb(); 
-
-    /* Compute the block size */
-    uint32_t block_size = 1024 << sb->s_log_block_size;
+    /* Get the block size */
+    uint32_t block_size = ext2_get_block_size();
     char buffer[block_size];
     ext2_read_block(1, buffer); 
-    memcpy(&bgdt, buffer, sizeof(bgdt));
+    memcpy(&__bgdt, buffer, sizeof(__bgdt));
     return 0; 
 
 }
@@ -43,15 +41,12 @@ uint8_t ext2_extract_bgdt(void)
  */
 uint8_t ext2_write_bgdt(void)
 {
-    ext2_super_block * sb = ext2_get_sb(); 
-    
-    /* Compute the block size */
-    
-    uint32_t block_size = 1024 << sb->s_log_block_size;
+    /* Get the block size */
+    uint32_t block_size = ext2_get_block_size();
     char buffer[block_size];
     ext2_read_block(1, buffer); 
 
-    memcpy(buffer, &bgdt, sizeof(bgdt));
+    memcpy(buffer, &__bgdt, sizeof(__bgdt));
     ext2_write_block(1, buffer);
     return 0; 
 

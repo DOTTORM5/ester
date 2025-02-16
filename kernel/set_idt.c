@@ -14,7 +14,7 @@ __attribute__((aligned(0x10)))
 static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
 
 
-// This is a general interrupt/exception handler, for now just a stub // to put in another specific file
+// TODO This is a general interrupt/exception handler, for now just a stub // to put in another specific file
 // __attribute__((noreturn))
 void exception_handler(void) 
 {

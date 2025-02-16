@@ -138,23 +138,23 @@ void ahci_probe_port(HBA_MEM *abar)
 			int dt = ahci_check_type(&abar->ports[i]);
             if (dt == AHCI_DEV_SATA)
 			{
-				printk("SATA drive found at port %d\n", i);
+				// printk("SATA drive found at port %d\n", i);
 			}
 			else if (dt == AHCI_DEV_SATAPI)
 			{
-				printk("SATAPI drive found at port %d\n", i);
+				// printk("SATAPI drive found at port %d\n", i);
 			}
 			else if (dt == AHCI_DEV_SEMB)
 			{
-				printk("SEMB drive found at port %d\n", i);
+				// printk("SEMB drive found at port %d\n", i);
 			}
 			else if (dt == AHCI_DEV_PM)
 			{
-				printk("PM drive found at port %d\n", i);
+				// printk("PM drive found at port %d\n", i);
 			}
 			else
 			{
-				printk("No drive found at port %d\n", i);
+				// printk("No drive found at port %d\n", i);
 			}
 		}
 

@@ -8,7 +8,7 @@
 // Print char - call the right driver print function - for now vga only
 static void print_char (char c)
 {
-    vga_print_char(c, BLACK, RED);
+    vga_print_char(c, BLACK, LBLUE);
     return;
 }
 
