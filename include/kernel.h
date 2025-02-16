@@ -3,6 +3,6 @@
 
 #define GDT_OFFSET_KERNEL_CODE 0x08
 
-void kernel_entry( __u32 m2_info_address );
+void kernel_entry( uint32_t m2_info_address );
 
 #endif // KERNEL_H

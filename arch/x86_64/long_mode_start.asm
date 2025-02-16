@@ -13,7 +13,7 @@ long_mode_start:
     mov fs, ax
     mov gs, ax
 
-    ; call kernel entry passing to it the physical address provided by multiboot2, the kernel will find important information at that address
+    ; call kernel entry passing to it the physical address provided by multiboot2, the kernel will find important informations at that address
     mov rdi, rbx
     call kernel_entry
     hlt

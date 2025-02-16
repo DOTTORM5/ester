@@ -7,20 +7,20 @@
 #define MODULE_TAG_TYPE 3
 
 typedef struct {
-    __u32 total_size;
-    __u32 reserved;
-} __attribute__((aligned(0x8))) __fixed_tag;
+    uint32_t total_size;
+    uint32_t reserved;
+} __attribute__((aligned(0x8))) fixed_tag_t;
 
 typedef struct {
-    __u32 type;
-    __u32 size;
-    __u32 mod_start;
-    __u32 mod_end;
-    __u8 * string;
-} __attribute__((aligned(0x8))) __module_tag;
+    uint32_t type;
+    uint32_t size;
+    uint32_t mod_start;
+    uint32_t mod_end;
+    uint8_t * string;
+} __attribute__((aligned(0x8))) module_tag_t;
 
 
-__module_tag * multiboot2_parser(__u32 base_address); 
+module_tag_t * multiboot2_parser(uint32_t base_address); 
 
 
 

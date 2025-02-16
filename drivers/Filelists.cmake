@@ -1,0 +1,6 @@
+file(GLOB cmakeFiles ${ESTER_DIR}/drivers/*/Filelists.cmake)
+foreach(cmakeFile ${cmakeFiles})
+    # if (IS_FILE ${cmakeFile})
+        include(${cmakeFile})
+    # endif()
+endforeach()
