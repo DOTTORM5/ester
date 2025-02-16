@@ -44,8 +44,9 @@ uint8_t ext2_extract_bgdt(void)
 uint8_t ext2_write_bgdt(void)
 {
     ext2_super_block * sb = ext2_get_sb(); 
-
+    
     /* Compute the block size */
+    
     uint32_t block_size = 1024 << sb->s_log_block_size;
     char buffer[block_size];
     ext2_read_block(1, buffer); 

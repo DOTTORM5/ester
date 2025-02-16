@@ -64,13 +64,8 @@ uint32_t ext2_free_block_alloc( uint32_t group )
     /* Get the block bitmap from the disk */
     uint8_t block_bitmap [block_size];
     ext2_read_block(bgd->bg_block_bitmap, block_bitmap); 
-
-    printk("HERE I :\n");
     
     for (uint32_t i = 0; i < sb->s_inodes_per_group; i++) {
-
-        
-
 
         if ( (block_bitmap[i/8] & (1 << (i % 8 )) ) == 0) {
             
@@ -87,7 +82,6 @@ uint32_t ext2_free_block_alloc( uint32_t group )
             sb->s_free_blocks_count--;
             ext2_write_sb();
 
-
             return (group * sb->s_blocks_per_group) + i; 
         }
     }
@@ -97,6 +91,8 @@ uint32_t ext2_free_block_alloc( uint32_t group )
 
 uint8_t ext2_add_dir_entry (ext2_inode_t * dir_inode, uint32_t new_entry_inode_num, const char * new_entry_name) 
 {
+
+    /* Check the size of new entry name */
     /* Get the superblock */
     ext2_super_block *sb = ext2_get_sb();
     /* Compute the block size */
@@ -138,7 +134,9 @@ uint8_t ext2_add_dir_entry (ext2_inode_t * dir_inode, uint32_t new_entry_inode_n
                 new_entry->dir_entry_size = old_rec_len - current_entry->dir_entry_size;
                 new_entry->dir_name_len = strlen(new_entry_name);
                 new_entry->dir_type = 0; 
-                memcpy(new_entry->dir_name, new_entry_name, strlen(new_entry_name));
+                memcpy(&new_entry->dir_name, new_entry_name, strlen(new_entry_name));
+
+                printk("DIR NAME: %s\n", new_entry->dir_name);
                 /* Write the buffer back to the disk */
                 ext2_write_block(dir_inode->i_block[i], buffer);
                 return 0;
@@ -202,19 +200,19 @@ uint32_t ext2_blocks_to_sectors (uint32_t blocks)
 
 /**
  * Ext2 file create. Create a file on the disk, the parent directory of the file must exist. 
- * @param const char * pathname the path of the file to be created. 
+ * @param ext2_file_t * f the file to be created. 
  * @return uint8_t non-zero value in case of errors
  */
-uint8_t ext2_file_create( const char * pathname ) 
+uint8_t ext2_file_create( ext2_file_t * f ) 
 {
     /* Check the pathname length */
-    if ( strlen(pathname) > MAX_PATH_LEN ) {
+    if ( strlen(f->pathname) > MAX_PATH_LEN ) {
         printk("The pathname is too long, can't create\n");
         return 1; 
     }
 
     char unpacked_path[MAX_PATH_DEPTH][EXT2_NAME_LEN+2]; 
-    uint16_t path_depth = unpack_dir_path(pathname, unpacked_path);
+    uint16_t path_depth = unpack_dir_path(f->pathname, unpacked_path);
 
     /* Check the path depth */
     if ( path_depth > MAX_PATH_DEPTH ) {
@@ -242,7 +240,6 @@ uint8_t ext2_file_create( const char * pathname )
         return 1;
     }
 
-
     /* Get the superblock */
     ext2_super_block * sb = ext2_get_sb(); 
 
@@ -251,14 +248,15 @@ uint8_t ext2_file_create( const char * pathname )
 
     /* Get a free inode number */
     uint32_t inode_num = ext2_free_inode_alloc(parent_group_num);
-    if ( inode_num != 0 ) {
+    if ( inode_num == 0 ) {
         printk("No more free inodes in this group, can't create\n");
         return 1;
-    } 
+    }
     
     /* Get a free block number */
     uint32_t block_num = ext2_free_block_alloc(parent_group_num);
-    if ( block_num != 0 ) {
+
+    if ( block_num == 0 ) {
         printk("No more free blocks in this group, can't create\n");
         return 1;
     } 
@@ -270,13 +268,19 @@ uint8_t ext2_file_create( const char * pathname )
     new_inode.i_links_count = 1;
     new_inode.i_disk_sectors_count = ext2_blocks_to_sectors(1);
     new_inode.i_lower_size = 0; 
+
+    /* Save the inode into the file struct */
+    f->inode_num = inode_num;
+    memcpy(&f->inode, &new_inode, sizeof(ext2_inode_t));
+
     ext2_inode_write(inode_num, &new_inode); 
     uint8_t err = ext2_add_dir_entry(parent_inode, inode_num, unpacked_path[path_depth-1]);
     if ( err != 0 ) {
-        /* TODO - here the allocated inode and block should be ripristined as free, or they should never committed before this point... */
+        /* TODO - here the allocated inode and block should be restored as free, or they should never committed before this point... */
         printk("Error adding the dir entry\n");
         return 1;
     }
+    f->exist = 1;
 
     /* SUCCESS THE FILE IS CREATED */
     return 0; 
@@ -357,11 +361,10 @@ uint8_t ext2_fclose( ext2_file_t * f )
 
     /* Check if the file exists on the disk */
     if ( !f->exist ) {   /* the file does not exist, needs to be created */
-        if ( ext2_file_create(f->pathname) != 0 ) {
+        if ( ext2_file_create(f) != 0 ) {
             printk("The file cannot be created for some errors\n");
             goto end;
-        } 
-        f->exist = 1;
+        }
     }
 
     ext2_super_block * sb = ext2_get_sb();
@@ -412,9 +415,28 @@ uint8_t ext2_fread( ext2_file_t * f, uint8_t * buff, uint32_t size )
         return 1;
     }    
 
-    
-    // ext2_read_file(); 
+    ext2_super_block * sb = ext2_get_sb();
+    uint32_t block_size = 1024 << sb->s_log_block_size;
+ 
+    /* TODO - for now support only maximum 4k of data write */
+    if (size > block_size) {
+        printk("Want to read too many bytes, are you crazy? Can't read!\n");
+        return 1;
+    }
 
+    uint8_t tmp_buffer[block_size];
+
+    /* Want to read beyond the buffer */
+    if ( ((f->pos%block_size) + size) > block_size ) {
+        memcpy(buff, f->buff+(f->pos%block_size), block_size -  (f->pos%block_size)); 
+        uint32_t block_id = f->pos/block_size + 1; 
+        uint32_t block_num = f->inode.i_block[block_id];  /* TODO For now we support only direct blocks */
+        ext2_read_block(block_num, tmp_buffer);
+        memcpy(buff+(block_size-(f->pos%block_size)), tmp_buffer, size+(f->pos%block_size)-block_size); 
+
+    } else {   /* Base case, simply return the buffer */
+        memcpy(buff, f->buff+(f->pos%block_size), size);
+    }
 
     return 0; 
 }
@@ -429,6 +451,7 @@ uint8_t ext2_fread( ext2_file_t * f, uint8_t * buff, uint32_t size )
  */
 uint8_t ext2_fwrite( ext2_file_t * f, uint8_t * buff, uint32_t size )   /* TODO here for now we do not buffer anything, all the bytes are written to the disk asap  */
 {
+
     if ( !f->open ) {
         printk("The file is not open.\n");
         return 1;
@@ -436,15 +459,20 @@ uint8_t ext2_fwrite( ext2_file_t * f, uint8_t * buff, uint32_t size )   /* TODO 
 
     /* Check if the file exists on the disk */
     if ( !f->exist ) {   /* the file does not exist, needs to be created */
-        if ( ext2_file_create(f->pathname) != 0 ) {
+        if ( ext2_file_create(f) != 0 ) {
             printk("The file cannot be created for some errors\n");
             return 1;
         } 
-        f->exist = 1;
     }
 
     ext2_super_block * sb = ext2_get_sb();
     uint32_t block_size = 1024 << sb->s_log_block_size;
+ 
+    /* TODO - for now support only maximum 4k of data write */
+    if (size > block_size) {
+        printk("The buffer is too big, can't write\n");
+        return 1;
+    }
 
     uint32_t block_id = f->pos/block_size; 
     uint32_t block_num = f->inode.i_block[block_id];
@@ -460,8 +488,7 @@ uint8_t ext2_fwrite( ext2_file_t * f, uint8_t * buff, uint32_t size )   /* TODO 
 
             uint32_t group = (f->inode_num - 1) / sb->s_inodes_per_group;
             /* I have to allocate another block for this file */
-            block_num = ext2_free_block_alloc(group) ;
-
+            block_num = ext2_free_block_alloc(group);
             
             if (block_num == 0) {
                 printk("Can't allocate a new block for this file\n");
@@ -481,14 +508,10 @@ uint8_t ext2_fwrite( ext2_file_t * f, uint8_t * buff, uint32_t size )   /* TODO 
             block_id = f->pos/block_size + 1; 
             block_num = f->inode.i_block[block_id];  /* TODO For now we support only direct blocks */
         }
-
-        /* TODO we are not considering to write more than one block beyond the actual one .... buuuuu */
         
         uint8_t new_buff[block_size]; 
         memset(new_buff, 0x00, block_size);
-        memcpy(new_buff, buff+(block_size-(f->pos%block_size)), size+(f->pos%block_size)-block_size);   /* mybe +1 boh */
-
-        printk("");
+        memcpy(new_buff, buff+(block_size-(f->pos%block_size)), size+(f->pos%block_size)-block_size); 
 
         ext2_write_block(block_num, new_buff);
 
@@ -526,11 +549,10 @@ uint8_t ext2_fseek( ext2_file_t * f, uint32_t new_pos )
 
     /* Check if the file exists on the disk */
     if ( !f->exist ) {   /* the file does not exist, needs to be created */
-        if ( ext2_file_create(f->pathname) != 0 ) {
+        if ( ext2_file_create(f) != 0 ) {
             printk("The file cannot be created for some errors\n");
             return 1;
         } 
-        f->exist = 1;
     }
 
     ext2_super_block * sb = ext2_get_sb();

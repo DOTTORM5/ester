@@ -198,3 +198,6 @@ void ext2_read_file( char * file_name, uint32_t offset, uint8_t * ptr )
     
     return;
 }
+
+
+/* Create directory (?) */

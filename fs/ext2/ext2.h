@@ -159,6 +159,7 @@ ext2_file_t * ext2_fopen( const char * pathname, const char * mode ) ;
 uint8_t ext2_fclose( ext2_file_t * f ) ;
 uint8_t ext2_fwrite( ext2_file_t * f, uint8_t * buff, uint32_t size );
 uint8_t ext2_fseek( ext2_file_t * f, uint32_t new_pos ) ;
+uint8_t ext2_fread( ext2_file_t * f, uint8_t * buff, uint32_t size ) ;
 
 
 uint8_t ext2_read_block( uint32_t block_id, uint8_t * buff ); 

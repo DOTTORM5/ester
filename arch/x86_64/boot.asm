@@ -168,7 +168,7 @@ p1_table_6:
 p1_table_7:
     resb 4096
 stack_bottom:
-    resb 64
+    resb 65536
 stack_top:
 
 section .rodata
